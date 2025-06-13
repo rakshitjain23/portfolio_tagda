@@ -32,11 +32,11 @@ app = FastAPI(
 )
 
 # Configure CORS
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com,https://portfolio-tagda.vercel.app").split(",")
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "*").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["*"],  # Allow all origins for debugging
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -562,6 +562,15 @@ Answer:"""
             status_code=500, 
             detail="An unexpected error occurred. Please try again later."
         )
+
+@app.get("/test-cors")
+async def test_cors():
+    """Test endpoint to verify CORS is working"""
+    return {
+        "message": "CORS test successful",
+        "timestamp": time.time(),
+        "cors_origins": cors_origins
+    }
 
 # Error handlers
 @app.exception_handler(404)
