@@ -13,7 +13,7 @@ services:
       echo "Build completed successfully"
     startCommand: |
       echo "Starting application..."
-      gunicorn main:app --bind 0.0.0.0:$PORT --workers 4 --log-level debug --timeout 600
+      gunicorn main:app --bind 0.0.0.0:$PORT --workers 4 --log-level debug --timeout 600 --worker-class uvicorn.workers.UvicornWorker
     healthCheckPath: /test
     autoDeploy: true
     envVars:
@@ -32,6 +32,8 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PYTHON_VERSION
-        value: "3.11.0"
+        value: "3.11.7"
       - key: PIP_NO_CACHE_DIR
-        value: "1" 
+        value: "1"
+      - key: PYTHONPATH
+        value: "/opt/render/project/src/backend" 
