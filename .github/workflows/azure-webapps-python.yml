@@ -36,9 +36,15 @@ jobs:
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      - name: Zip artifact for deployment
+      - name: Prepare deployment package
         run: |
           cd backend
+          # Create a new directory for deployment
+          mkdir -p ../deploy
+          # Copy all files to the deployment directory
+          cp -r * ../deploy/
+          # Create the zip file
+          cd ../deploy
           zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment jobs
