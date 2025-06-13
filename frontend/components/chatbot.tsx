@@ -84,10 +84,7 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/chat`;
-      console.log('Chatbot: Making request to:', backendUrl);
-      
-      const response = await fetch(backendUrl, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,19 +92,14 @@ export default function Chatbot() {
         body: JSON.stringify({ message: userMessage }),
       });
 
-      console.log('Chatbot: Response status:', response.status);
-      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Chatbot: Response error:', errorText);
         throw new Error("Failed to get response");
       }
 
       const data = await response.json();
-      console.log('Chatbot: Response data:', data);
       setMessages((prev) => [...prev, { text: data.response, isUser: false }]);
     } catch (error) {
-      console.error("Chatbot: Chat error:", error);
+      console.error("Chat error:", error);
       setMessages((prev) => [
         ...prev,
         {
