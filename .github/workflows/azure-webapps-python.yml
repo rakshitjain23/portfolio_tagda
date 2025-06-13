@@ -84,4 +84,5 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'tagda-backend'
-          slot-name: 'Production' 
+          slot-name: 'Production'
+          package: . 
