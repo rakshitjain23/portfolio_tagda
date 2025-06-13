@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download } from "lucide-react";
+import { Download, ExternalLink, FileText, Monitor, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -24,6 +24,18 @@ export default function ResumePage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+      },
+    }),
+  };
+
   return (
     <div className="container py-12 md:py-24">
       <motion.h1
@@ -36,97 +48,230 @@ export default function ResumePage() {
       </motion.h1>
 
       <div className="flex flex-col items-center gap-8">
+        {/* Download Section */}
         <motion.div
-          className="w-full max-w-3xl"
+          className="w-full max-w-4xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="flex justify-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
             <Link
               href="/resume.pdf"
               target="_blank"
               download
-              className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-3 text-base font-medium shadow transition-colors hover:bg-primary/90"
+              className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-3 text-base font-medium shadow transition-all hover:bg-primary/90 hover:scale-105"
             >
               <Download className="mr-2 h-4 w-4" /> Download Resume
             </Link>
+            <Link
+              href="/resume.pdf"
+              target="_blank"
+              className="inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground px-6 py-3 text-base font-medium shadow transition-all hover:bg-secondary/90 hover:scale-105"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" /> Open in New Tab
+            </Link>
           </div>
 
+          {/* Resume Preview Section */}
           <div className="border rounded-lg overflow-hidden bg-card shadow-lg">
             {isMobile ? (
-              <div className="p-6 text-center">
-                <p className="text-muted-foreground mb-4">
-                  Resume preview is not available on mobile devices for better performance.
-                </p>
-                <Link
-                  href="/resume.pdf"
-                  target="_blank"
-                  className="inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground px-4 py-2 text-sm font-medium"
-                >
-                  Open Resume in New Tab
-                </Link>
-              </div>
+              <motion.div 
+                className="p-8 text-center bg-gradient-to-br from-primary/5 to-secondary/5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-xl font-semibold">Resume Preview</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      For the best viewing experience, please open the resume on a desktop device or download it to view offline.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Smartphone className="h-4 w-4" />
+                    <span>Mobile devices may not display PDFs optimally</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                    <Link
+                      href="/resume.pdf"
+                      target="_blank"
+                      className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium shadow transition-all hover:bg-primary/90"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" /> Open Resume
+                    </Link>
+                    <Link
+                      href="/resume.pdf"
+                      download
+                      className="inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground px-4 py-2 text-sm font-medium shadow transition-all hover:bg-secondary/90"
+                    >
+                      <Download className="mr-2 h-4 w-4" /> Download
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
             ) : (
-              <div className="aspect-[8.5/11] w-full bg-muted">
-                <iframe
-                  src="/resume.pdf#toolbar=0"
-                  className="w-full h-full"
-                  style={{ minHeight: "80vh" }}
-                />
-              </div>
+              <motion.div 
+                className="aspect-[8.5/11] w-full bg-muted relative rounded-lg overflow-hidden border-2 border-primary/20 shadow-lg"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                {/* Resume Container with proper styling */}
+                <div className="absolute inset-0 bg-gradient-to-br from-background/50 to-muted/30 backdrop-blur-sm">
+                  <iframe
+                    src="/resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                    className="w-full h-full border-0"
+                    title="Rakshit Jain Resume"
+                  />
+                </div>
+                
+                {/* Top border decoration */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/40 via-primary/60 to-primary/40"></div>
+                
+                {/* Corner decorations */}
+                <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-primary/40 rounded-tl"></div>
+                <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-primary/40 rounded-tr"></div>
+                <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-primary/40 rounded-bl"></div>
+                <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-primary/40 rounded-br"></div>
+                
+                {/* Desktop indicator */}
+                <div className="absolute top-4 right-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded border border-primary/20">
+                  <Monitor className="h-3 w-3" />
+                  <span>Desktop View</span>
+                </div>
+                
+                {/* Resume label */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded border border-primary/20">
+                  <FileText className="h-3 w-3" />
+                  <span>Resume.pdf</span>
+                </div>
+              </motion.div>
             )}
           </div>
         </motion.div>
 
+        {/* Skills Summary Section */}
         <motion.div
-          className="w-full max-w-3xl mt-8"
+          className="w-full max-w-4xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <h2 className="text-2xl font-bold mb-6">Skills Summary</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">Skills Summary</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Frontend Development</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div 
+              className="space-y-4 p-6 rounded-lg border bg-card shadow-sm"
+              custom={0}
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                Frontend Development
+              </h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li>Next.js & React</li>
-                <li>Framer Motion</li>
-                <li>Responsive Design</li>
-                <li>UI/UX Principles</li>
-                <li>TypeScript</li>
+                <li>TypeScript & JavaScript</li>
+                <li>Tailwind CSS & Framer Motion</li>
+                <li>Responsive Design & UI/UX</li>
+                <li>Progressive Web Apps</li>
               </ul>
-            </div>
+            </motion.div>
             
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Backend Development</h3>
+            <motion.div 
+              className="space-y-4 p-6 rounded-lg border bg-card shadow-sm"
+              custom={1}
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Backend Development
+              </h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Node.js</li>
-                <li>FastAPI</li>
-                <li>Database Management</li>
-                <li>RESTful APIs</li>
-                <li>Authentication & Security</li>
+                <li>Node.js & Express.js</li>
+                <li>Python & FastAPI</li>
+                <li>Database Management (MongoDB, PostgreSQL)</li>
+                <li>RESTful APIs & Authentication</li>
+                <li>Cloud Deployment & DevOps</li>
               </ul>
-            </div>
+            </motion.div>
             
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Mobile Development</h3>
+            <motion.div 
+              className="space-y-4 p-6 rounded-lg border bg-card shadow-sm"
+              custom={2}
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                Mobile Development
+              </h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Flutter</li>
-                <li>Dart</li>
+                <li>Flutter & Dart</li>
                 <li>Cross-platform Development</li>
+                <li>Mobile UI/UX Design</li>
+                <li>State Management</li>
+                <li>Native Features Integration</li>
               </ul>
-            </div>
+            </motion.div>
             
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Other Skills</h3>
+            <motion.div 
+              className="space-y-4 p-6 rounded-lg border bg-card shadow-sm"
+              custom={3}
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+            >
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                Other Skills
+              </h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>Version Control (Git)</li>
-                <li>Cloud Deployment</li>
-                <li>Problem Solving</li>
-                <li>Team Collaboration</li>
+                <li>Version Control (Git & GitHub)</li>
+                <li>Data Structures & Algorithms</li>
+                <li>Problem Solving & Critical Thinking</li>
+                <li>Team Collaboration & Communication</li>
+                <li>Open Source Contribution</li>
               </ul>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Additional Information */}
+        <motion.div
+          className="w-full max-w-4xl text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <div className="p-6 rounded-lg border bg-card shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
+            <p className="text-muted-foreground mb-4">
+              Interested in working together? Feel free to reach out for collaborations, job opportunities, or just to say hello!
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-2 text-sm font-medium shadow transition-all hover:bg-primary/90"
+              >
+                Contact Me
+              </Link>
+              <Link
+                href="mailto:rakshitgang23@gmail.com"
+                className="inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground px-6 py-2 text-sm font-medium shadow transition-all hover:bg-secondary/90"
+              >
+                Send Email
+              </Link>
             </div>
           </div>
         </motion.div>
