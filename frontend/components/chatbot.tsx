@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, X, MessageCircle } from "lucide-react";
 
@@ -25,7 +25,7 @@ export default function Chatbot() {
   }, []);
 
   // Function to show prompt at random intervals
-  const showRandomPrompt = () => {
+  const showRandomPrompt = useCallback(() => {
     // Clear any existing timeout
     if (promptTimeoutRef.current) {
       clearTimeout(promptTimeoutRef.current);
@@ -50,7 +50,7 @@ export default function Chatbot() {
         showRandomPrompt();
       }, 5000);
     }, randomTime);
-  };
+  }, [isOpen]);
 
   // Start showing prompts when component mounts
   useEffect(() => {
