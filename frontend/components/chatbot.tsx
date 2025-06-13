@@ -9,6 +9,7 @@ interface Message {
   isUser: boolean;
 }
 
+// Chatbot component - Updated for devrakshit.me domain
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
