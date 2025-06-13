@@ -30,4 +30,6 @@ services:
       - key: SMTP_PORT
         value: "587"
       - key: PYTHONUNBUFFERED
-        value: "1" 
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.11.0" 
