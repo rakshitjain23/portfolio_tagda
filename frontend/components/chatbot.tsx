@@ -64,7 +64,7 @@ export default function Chatbot() {
         clearTimeout(promptTimeoutRef.current);
       }
     };
-  }, [isOpen, isMounted]); // Re-run when chat opens/closes or component mounts
+  }, [isOpen, isMounted, showRandomPrompt]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

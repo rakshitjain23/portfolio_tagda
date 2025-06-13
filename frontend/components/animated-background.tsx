@@ -34,7 +34,7 @@ export default function AnimatedBackground() {
       vy: number;
       opacity: number;
 
-      constructor() {
+      constructor(canvas: HTMLCanvasElement) {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.vx = (Math.random() - 0.5) * particleSpeed;
@@ -63,7 +63,7 @@ export default function AnimatedBackground() {
 
     // Create particles
     for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+      particles.push(new Particle(canvas));
     }
 
     // Animation loop
