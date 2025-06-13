@@ -20,12 +20,12 @@ load_dotenv()
 # Initialize FastAPI app
 app = FastAPI(
     title="Portfolio Backend",
-    description="Backend API for Rakshit Jain's Portfolio",
+    description="Backend API for Portfolio",
     version="1.0.0"
 )
 
 # Configure CORS
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://portfolio-tagda.vercel.app").split(",")
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,15 +34,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Simple test endpoint
-@app.get("/test")
-async def test():
-    return {"status": "ok", "message": "API is working!"}
-
-# Hugging Face API configuration
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"  # Changed to a better model for Q&A
 
 # Models
 class ContactForm(BaseModel):
@@ -157,8 +148,6 @@ def send_email_notification(name: str, email: str, message: str):
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(sender_email, sender_password)
-        
-        # Send email
         server.send_message(msg)
         server.quit()
         return True
@@ -169,7 +158,7 @@ def send_email_notification(name: str, email: str, message: str):
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to Rakshit Jain's Portfolio API",
+        "message": "Welcome to Portfolio API",
         "endpoints": {
             "contact": "/api/contact",
             "chat": "/api/chat"
@@ -185,7 +174,7 @@ async def contact(form: ContactForm):
         
         if not email_sent:
             raise HTTPException(status_code=500, detail="Failed to send email notification")
-        
+
         return {"message": "Message sent successfully!"}
     except Exception as e:
         logger.error(f"Contact form error: {e}")
@@ -200,7 +189,8 @@ async def chat(message: ChatMessage):
         logger.info(f"Received chat message: {message.message}")
         
         # Verify Hugging Face API key
-        if not HUGGINGFACE_API_KEY:
+        huggingface_api_key = os.getenv("HUGGINGFACE_API_KEY")
+        if not huggingface_api_key:
             logger.error("Hugging Face API key is missing")
             raise HTTPException(status_code=500, detail="Hugging Face API key is not configured")
 
@@ -320,7 +310,7 @@ Answer:"""
 
         # Make request to Hugging Face API
         headers = {
-            "Authorization": f"Bearer {HUGGINGFACE_API_KEY}",
+            "Authorization": f"Bearer {huggingface_api_key}",
             "Content-Type": "application/json"
         }
         
@@ -337,7 +327,7 @@ Answer:"""
         }
 
         logger.info("Sending request to Hugging Face API...")
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post("https://api-inference.huggingface.co/models/google/flan-t5-base", headers=headers, json=payload)
         
         if response.status_code != 200:
             logger.error(f"Hugging Face API error: {response.text}")
