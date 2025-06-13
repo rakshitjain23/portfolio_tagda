@@ -31,7 +31,7 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS
+# Configure CORS - Updated for devrakshit.me domain
 cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com,https://portfolio-tagda.vercel.app,https://devrakshit.me,https://www.devrakshit.me").split(",")
 
 app.add_middleware(
