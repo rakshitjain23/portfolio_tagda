@@ -17,7 +17,7 @@ export default function Chatbot() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const promptTimeoutRef = useRef<NodeJS.Timeout>();
+  const promptTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle initial mount
   useEffect(() => {
