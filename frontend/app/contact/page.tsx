@@ -76,7 +76,7 @@ export default function ContactPage() {
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Contact Information</h2>
             <p className="text-muted-foreground">
-              Feel free to reach out to me! I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+              Feel free to reach out to me! I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
             </p>
             <p>Let&apos;s connect and build something amazing together!</p>
           </div>
@@ -129,7 +129,7 @@ export default function ContactPage() {
             >
               <div className="text-center space-y-2">
                 <h3 className="text-xl font-semibold">Message Sent!</h3>
-                <p>Thank you for reaching out. I'll get back to you soon.</p>
+                <p>Thank you for reaching out. I&apos;ll get back to you soon.</p>
               </div>
             </motion.div>
           ) : (

@@ -75,16 +75,16 @@ export default function AboutPage() {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold">Hi, I'm Rakshit Jain</h2>
+          <h2 className="text-2xl font-bold">Hi, I&apos;m Rakshit Jain</h2>
           <div className="space-y-4 text-muted-foreground">
             <p>
-              I'm a Full Stack Developer and AI Enthusiast with a passion for building modern, scalable applications.
+              I&apos;m a Full Stack Developer and AI Enthusiast with a passion for building modern, scalable applications.
             </p>
             <p>
               I specialize in Next.js, React, Node.js, Python, and C++. Currently learning Data Structures & Algorithms and diving into AI development.
             </p>
             <p>
-              When I'm not coding, you can find me playing chess, solving coding challenges, or contributing to open source projects.
+              When I&apos;m not coding, you can find me playing chess, solving coding challenges, or contributing to open source projects.
             </p>
             <p>Rakshit&apos;s journey in tech started with Angela Yu&apos;s Udemy course.</p>
             <p>He&apos;s always eager to learn and grow.</p>

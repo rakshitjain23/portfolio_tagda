@@ -193,7 +193,7 @@ export default function Home() {
           >
             <div className="space-y-4">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent font-display">Featured Projects</h2>
-              <p className="text-muted-foreground font-light">Some of my recent work that I'm proud of.</p>
+              <p className="text-muted-foreground font-light">Some of my recent work that I&apos;m proud of.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
               <motion.div 
