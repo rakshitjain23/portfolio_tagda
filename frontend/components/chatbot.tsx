@@ -84,7 +84,7 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://tagda-backend.onrender.com'}/api/chat`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -26,7 +26,7 @@ export default function ContactPage() {
     setError("");
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://tagda-backend.onrender.com'}/api/contact`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
