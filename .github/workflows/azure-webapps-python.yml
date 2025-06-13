@@ -45,6 +45,8 @@ jobs:
           cp -r * ../deploy/
           # Create the zip file
           cd ../deploy
+          # Ensure requirements.txt is in the root
+          cp ../backend/requirements.txt .
           zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment jobs
