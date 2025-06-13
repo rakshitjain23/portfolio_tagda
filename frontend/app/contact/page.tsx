@@ -78,6 +78,7 @@ export default function ContactPage() {
             <p className="text-muted-foreground">
               Feel free to reach out to me! I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
             </p>
+            <p>Let&apos;s connect and build something amazing together!</p>
           </div>
 
           <div className="space-y-6">
@@ -87,7 +88,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-medium">Email</h3>
-                <p className="text-muted-foreground">rakshitgang23@gmail.com</p>
+                <p className="text-muted-foreground">Rakshit&apos;s email: rakshitgang23@gmail.com</p>
               </div>
             </div>
 

@@ -21,7 +21,7 @@ const timeline = [
   },
   {
     title: "Web Development Journey",
-    description: "Started with Angela Yu's course. Built Bootstrap website, TinDog, FurniHaven, and MentorshipPro.",
+    description: "Started with Angela Yu&apos;s course. Built Bootstrap website, TinDog, FurniHaven, and MentorshipPro.",
   },
   {
     title: "Business & Social Impact",
@@ -86,6 +86,9 @@ export default function AboutPage() {
             <p>
               When I'm not coding, you can find me playing chess, solving coding challenges, or contributing to open source projects.
             </p>
+            <p>Rakshit&apos;s journey in tech started with Angela Yu&apos;s Udemy course.</p>
+            <p>He&apos;s always eager to learn and grow.</p>
+            <p>Rakshit&apos;s portfolio is a testament to his passion and dedication.</p>
           </div>
         </div>
         <div className="flex justify-center items-center">
