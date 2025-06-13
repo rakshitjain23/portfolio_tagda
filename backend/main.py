@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException, WebSocket, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 import os
 from dotenv import load_dotenv
@@ -8,10 +9,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
 import requests
-from typing import List
+from typing import List, Optional
+import time
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
@@ -19,13 +24,15 @@ load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Portfolio Backend",
-    description="Backend API for Portfolio",
-    version="1.0.0"
+    title="Rakshit Gang Portfolio API",
+    description="Backend API for Rakshit Gang's Portfolio Website",
+    version="2.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Configure CORS
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app").split(",")
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,6 +50,11 @@ class ContactForm(BaseModel):
 
 class ChatMessage(BaseModel):
     message: str
+
+class HealthCheck(BaseModel):
+    status: str
+    timestamp: float
+    version: str
 
 # Portfolio context for the AI
 PORTFOLIO_CONTEXT = """
@@ -99,100 +111,179 @@ Guidelines:
 - Share journey and growth in technology
 """
 
-# Add notification functionality
+# Global variables
 active_connections: List[WebSocket] = []
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    active_connections.append(websocket)
+# Utility functions
+def get_environment_info():
+    """Get environment information for debugging"""
+    return {
+        "python_version": os.getenv("PYTHON_VERSION", "Unknown"),
+        "port": os.getenv("PORT", "8000"),
+        "environment": os.getenv("ENVIRONMENT", "development"),
+        "cors_origins": cors_origins
+    }
+
+def send_email_notification(name: str, email: str, message: str) -> bool:
+    """Send email notification for contact form submissions"""
     try:
-        while True:
-            data = await websocket.receive_text()
-            # Broadcast the message to all connected clients
-            for connection in active_connections:
-                await connection.send_text(data)
-    except:
-        active_connections.remove(websocket)
+        # Email configuration
+        sender_email = os.getenv("SMTP_EMAIL")
+        sender_password = os.getenv("SMTP_PASSWORD")
+        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
 
-def send_email_notification(name: str, email: str, message: str):
-    # Email configuration
-    sender_email = os.getenv("SMTP_EMAIL")
-    sender_password = os.getenv("SMTP_PASSWORD")
-    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        if not all([sender_email, sender_password]):
+            logger.error("SMTP credentials not found in environment variables")
+            return False
 
-    if not all([sender_email, sender_password]):
-        logger.error("SMTP credentials not found in environment variables")
-        return False
+        # Create message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = sender_email  # Send to yourself
+        msg["Subject"] = f"New Contact Form Submission from {name}"
 
-    # Create message
-    msg = MIMEMultipart()
-    msg["From"] = sender_email
-    msg["To"] = sender_email  # Send to yourself
-    msg["Subject"] = f"New Contact Form Submission from {name}"
+        # Email body
+        body = f"""
+        New contact form submission received:
+        
+        Name: {name}
+        Email: {email}
+        Message: {message}
+        
+        Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}
+        """
 
-    # Email body
-    body = f"""
-    New contact form submission received:
-    
-    Name: {name}
-    Email: {email}
-    Message: {message}
-    """
+        msg.attach(MIMEText(body, "plain"))
 
-    msg.attach(MIMEText(body, "plain"))
-
-    try:
         # Create SMTP session
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
+        
+        logger.info(f"Email notification sent successfully for {name}")
         return True
     except Exception as e:
         logger.error(f"Error sending email: {e}")
         return False
 
-@app.get("/")
+# WebSocket endpoint
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time notifications"""
+    await websocket.accept()
+    active_connections.append(websocket)
+    logger.info(f"WebSocket connected. Total connections: {len(active_connections)}")
+    
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Broadcast the message to all connected clients
+            for connection in active_connections:
+                try:
+                    await connection.send_text(data)
+                except:
+                    # Remove disconnected clients
+                    if connection in active_connections:
+                        active_connections.remove(connection)
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+    finally:
+        if websocket in active_connections:
+            active_connections.remove(websocket)
+        logger.info(f"WebSocket disconnected. Total connections: {len(active_connections)}")
+
+# API Endpoints
+@app.get("/", response_model=dict)
 async def root():
+    """Root endpoint with API information"""
     return {
-        "message": "Welcome to Portfolio API",
+        "message": "Welcome to Rakshit Gang's Portfolio API",
+        "version": "2.0.0",
+        "status": "active",
         "endpoints": {
+            "health": "/health",
             "contact": "/api/contact",
-            "chat": "/api/chat"
+            "chat": "/api/chat",
+            "websocket": "/ws",
+            "docs": "/docs"
         },
-        "status": "active"
+        "environment": get_environment_info()
     }
+
+@app.get("/health", response_model=HealthCheck)
+async def health_check():
+    """Health check endpoint for monitoring"""
+    return HealthCheck(
+        status="healthy",
+        timestamp=time.time(),
+        version="2.0.0"
+    )
 
 @app.post("/api/contact")
 async def contact(form: ContactForm):
+    """Handle contact form submissions"""
     try:
+        logger.info(f"Contact form submission from {form.name} ({form.email})")
+        
         # Send email notification
         email_sent = send_email_notification(form.name, form.email, form.message)
         
         if not email_sent:
-            raise HTTPException(status_code=500, detail="Failed to send email notification")
+            logger.error("Failed to send email notification")
+            raise HTTPException(
+                status_code=500, 
+                detail="Failed to send email notification. Please try again later."
+            )
 
-        return {"message": "Message sent successfully!"}
+        # Send notification to connected WebSocket clients
+        notification = f"New contact form submission from {form.name}!"
+        for connection in active_connections:
+            try:
+                await connection.send_text(notification)
+            except:
+                # Remove disconnected clients
+                if connection in active_connections:
+                    active_connections.remove(connection)
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Message sent successfully!",
+                "status": "success"
+            }
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Contact form error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again later."
+        )
 
 @app.post("/api/chat")
 async def chat(message: ChatMessage):
+    """Handle chat messages with AI responses"""
     try:
         if not message.message.strip():
-            raise HTTPException(status_code=400, detail="Message cannot be empty")
+            raise HTTPException(
+                status_code=400, 
+                detail="Message cannot be empty"
+            )
 
-        logger.info(f"Received chat message: {message.message}")
+        logger.info(f"Chat message received: {message.message[:50]}...")
         
         # Verify Hugging Face API key
         huggingface_api_key = os.getenv("HUGGINGFACE_API_KEY")
         if not huggingface_api_key:
             logger.error("Hugging Face API key is missing")
-            raise HTTPException(status_code=500, detail="Hugging Face API key is not configured")
+            raise HTTPException(
+                status_code=500, 
+                detail="AI service is temporarily unavailable"
+            )
 
         # Analyze the user's message to determine the type of question
         message_lower = message.message.lower()
@@ -206,25 +297,40 @@ async def chat(message: ChatMessage):
             
             # Send notification to all connected clients
             for connection in active_connections:
-                await connection.send_text("New question about Rakshit's journey! Would you like to know more about his learning path?")
+                try:
+                    await connection.send_text("New question about Rakshit's journey! Would you like to know more about his learning path?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "journey"}
+            
         elif any(phrase in message_lower for phrase in ["who are you", "tell me about yourself", "introduce yourself", "how is rakshit"]):
             response = "I'm a passionate Full Stack Developer with a strong focus on web and app development. I'm constantly learning and growing, currently diving deep into DSA and contributing to open source projects. I love taking on challenging projects and believe in continuous learning. My technical stack includes React, Node.js, Python, and various AI technologies. I'm particularly proud of my work on Aashayein, a life-saving platform for blood donation in Jaipur. Would you like to know more about my specific skills or projects?"
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Rakshit! Would you like to know more about him?")
+                try:
+                    await connection.send_text("Someone is asking about Rakshit! Would you like to know more about him?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "introduction"}
+            
         elif any(phrase in message_lower for phrase in ["why should we hire you", "why you", "why choose you"]):
             response = "I bring a unique combination of technical skills and passion for learning. As a Full Stack Developer, I'm proficient in both frontend and backend technologies. What sets me apart is my ability to quickly learn new technologies and my commitment to creating meaningful projects. For example, I developed Aashayein to address a real social need in my community. I'm also actively learning DSA and contributing to open source, showing my dedication to growth. I believe in writing clean, maintainable code and solving real-world problems. Would you like to know more about my specific projects or technical expertise?"
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is interested in hiring Rakshit! Would you like to know more about his qualifications?")
+                try:
+                    await connection.send_text("Someone is interested in hiring Rakshit! Would you like to know more about his qualifications?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "hire"}
+            
         elif any(phrase in message_lower for phrase in ["strengths", "what are you good at", "best at"]):
             response = "My key strengths include:\n\n" + \
                       "1. Quick Learning: I rapidly adapt to new technologies and concepts\n" + \
@@ -236,33 +342,53 @@ async def chat(message: ChatMessage):
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Rakshit's strengths! Would you like to know more about his capabilities?")
+                try:
+                    await connection.send_text("Someone is asking about Rakshit's strengths! Would you like to know more about his capabilities?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "strengths"}
+            
         elif any(phrase in message_lower for phrase in ["available for work", "work with us", "hire you", "working with us"]):
             response = "You can contact me at rakshitgang23@gmail.com to discuss work opportunities. I'll let you know my availability and we can discuss how I can contribute to your project."
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is interested in working with Rakshit! Would you like to know more about his availability?")
+                try:
+                    await connection.send_text("Someone is interested in working with Rakshit! Would you like to know more about his availability?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "availability"}
+            
         elif any(phrase in message_lower for phrase in ["young", "early", "college", "student", "year"]):
             response = "While I am still in college, my passion for technology drives me to dive deep into different technologies and learn them quickly. I believe in continuous learning and applying my knowledge to create meaningful projects."
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Rakshit's experience level! Would you like to know more about his background?")
+                try:
+                    await connection.send_text("Someone is asking about Rakshit's experience level! Would you like to know more about his background?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "experience"}
+            
         elif "aashayein" in message_lower:
             response = "Aashayein is a special project close to my heart. It started in our college's Aashayein - The Life Saviours club, where I'm a member. After being motivated by our Director Arpit Sir during our first-year orientation, I took the initiative to digitalize Aashayein. The platform helps connect blood and SDP donors with patients in need across Jaipur. I'm not just the developer but also serve as a video and photo editor/grapher for the club. It's a project that combines my technical skills with a meaningful social cause."
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Aashayein! Would you like to know more about this life-saving project?")
+                try:
+                    await connection.send_text("Someone is asking about Aashayein! Would you like to know more about this life-saving project?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "aashayein"}
+            
         elif any(word in message_lower for word in ["contact", "email", "phone", "reach", "how can i contact"]):
             response = "You can contact Rakshit through:\n\n" + \
                       "📧 Email: rakshitgang23@gmail.com\n" + \
@@ -272,25 +398,40 @@ async def chat(message: ChatMessage):
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is looking for Rakshit's contact information! Would you like to know how to reach him?")
+                try:
+                    await connection.send_text("Someone is looking for Rakshit's contact information! Would you like to know how to reach him?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "contact"}
+            
         elif any(phrase in message_lower for phrase in ["dsa", "data structures", "algorithms", "problem solving"]):
             response = "I'm actively learning and practicing Data Structures and Algorithms through Take U Forward's resources. I believe strong problem-solving skills are crucial for a developer. I regularly solve coding problems and participate in programming challenges to improve my skills. This helps me write more efficient code and tackle complex problems effectively. Would you like to know about specific problems I've solved or my approach to problem-solving?"
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Rakshit's DSA skills! Would you like to know more about his problem-solving abilities?")
+                try:
+                    await connection.send_text("Someone is asking about Rakshit's DSA skills! Would you like to know more about his problem-solving abilities?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "dsa"}
+            
         elif any(phrase in message_lower for phrase in ["open source", "github", "contribute"]):
             response = "I'm actively involved in the open source community. Contributing to open source projects helps me learn from other developers, improve my coding skills, and give back to the community. I believe in the power of collaborative development and continuous learning. Would you like to know about specific open source projects I've contributed to?"
             
             # Send notification
             for connection in active_connections:
-                await connection.send_text("Someone is asking about Rakshit's open source contributions! Would you like to know more about his community involvement?")
+                try:
+                    await connection.send_text("Someone is asking about Rakshit's open source contributions! Would you like to know more about his community involvement?")
+                except:
+                    if connection in active_connections:
+                        active_connections.remove(connection)
             
-            return {"response": response}
+            return {"response": response, "type": "opensource"}
+            
         elif any(word in message_lower for word in ["skill", "expertise", "technology", "tech"]):
             prompt = f"""Question: What are Rakshit's technical skills and expertise?
 Context: {PORTFOLIO_CONTEXT}
@@ -327,7 +468,12 @@ Answer:"""
         }
 
         logger.info("Sending request to Hugging Face API...")
-        response = requests.post("https://api-inference.huggingface.co/models/google/flan-t5-base", headers=headers, json=payload)
+        response = requests.post(
+            "https://api-inference.huggingface.co/models/google/flan-t5-base", 
+            headers=headers, 
+            json=payload,
+            timeout=30
+        )
         
         if response.status_code != 200:
             logger.error(f"Hugging Face API error: {response.text}")
@@ -341,7 +487,8 @@ Answer:"""
                               "Database: MongoDB, PostgreSQL\n" +
                               "AI/ML: TensorFlow, PyTorch, OpenAI\n" +
                               "DSA: Problem solving, Algorithms, Data Structures\n\n" +
-                              "Would you like to know more about any specific technology?"
+                              "Would you like to know more about any specific technology?",
+                    "type": "skills"
                 }
             elif any(word in message_lower for word in ["project", "work", "application", "app"]):
                 return {
@@ -350,7 +497,8 @@ Answer:"""
                               "2. Rakshit Comm - Communication platform\n" +
                               "3. Rakun - AI chatbot\n" +
                               "4. FurniHaven - E-commerce platform\n\n" +
-                              "Which project would you like to learn more about?"
+                              "Which project would you like to learn more about?",
+                    "type": "projects"
                 }
             else:
                 return {
@@ -361,7 +509,8 @@ Answer:"""
                               "4. How to contact him\n" +
                               "5. His DSA and open source contributions\n" +
                               "6. His journey in technology\n\n" +
-                              "What would you like to know more about?"
+                              "What would you like to know more about?",
+                    "type": "general"
                 }
 
         # Extract the response text
@@ -391,24 +540,53 @@ Answer:"""
             ai_response = "I can help you learn about Rakshit's portfolio. He is a Full Stack Developer with expertise in React, Node.js, and AI development. What specific aspect would you like to learn more about?"
 
         logger.info("Chat completion successful")
-        return {"response": ai_response}
+        return {"response": ai_response, "type": "ai_generated"}
+        
+    except HTTPException:
+        raise
+    except requests.exceptions.Timeout:
+        logger.error("Hugging Face API request timed out")
+        raise HTTPException(
+            status_code=500, 
+            detail="AI service is taking too long to respond. Please try again."
+        )
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="Unable to connect to AI service. Please try again later."
+        )
     except Exception as e:
         logger.error(f"Chat error: {str(e)}")
-        if "api_key" in str(e).lower():
-            raise HTTPException(status_code=500, detail="Hugging Face API key is invalid or not configured")
-        # Dynamic fallback response based on the last message
-        return {
-            "response": "I can help you learn about:\n\n" +
-                      "1. Rakshit's technical skills and expertise\n" +
-                      "2. His projects and their details\n" +
-                      "3. His professional experience\n" +
-                      "4. How to contact him\n" +
-                      "5. His DSA and open source contributions\n" +
-                      "6. His journey in technology\n\n" +
-                      "What would you like to know more about?"
-        }
+        raise HTTPException(
+            status_code=500, 
+            detail="An unexpected error occurred. Please try again later."
+        )
+
+# Error handlers
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"message": "Endpoint not found", "status": "error"}
+    )
+
+@app.exception_handler(500)
+async def internal_error_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal server error", "status": "error"}
+    )
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", 8000))  # Use PORT from environment variables or default to 8000
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    port = int(os.getenv("PORT", 8000))
+    host = os.getenv("HOST", "0.0.0.0")
+    
+    logger.info(f"Starting server on {host}:{port}")
+    uvicorn.run(
+        app, 
+        host=host, 
+        port=port,
+        log_level="info"
+    )
