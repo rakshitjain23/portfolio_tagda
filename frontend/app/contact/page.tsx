@@ -26,7 +26,6 @@ export default function ContactPage() {
     setError("");
     
     try {
-      console.log('Contact: Sending form data:', formData);
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/contact`, {
         method: "POST",
         headers: {
@@ -35,9 +34,7 @@ export default function ContactPage() {
         body: JSON.stringify(formData),
       });
 
-      console.log('Contact: Response status:', response.status);
       const data = await response.json();
-      console.log('Contact: Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.detail || "Something went wrong");
