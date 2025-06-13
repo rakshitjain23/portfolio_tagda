@@ -57,7 +57,7 @@ npm install
 
 3. Create `.env.local` file:
 ```
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_BACKEND_URL=https://tagda-backend.onrender.com
 ```
 
 4. Run development server:
@@ -91,6 +91,10 @@ pip install -r requirements.txt
 4. Create `.env` file:
 ```
 HUGGINGFACE_API_KEY=your_api_key
+SMTP_EMAIL=your_email
+SMTP_PASSWORD=your_password
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
 ```
 
 5. Run development server:
@@ -113,26 +117,32 @@ cd frontend
 vercel
 ```
 
-### Backend (Azure)
+### Backend (Render)
 
-1. Install Azure Functions Core Tools:
-```bash
-npm install -g azure-functions-core-tools@4
-```
-
-2. Deploy:
-```bash
-cd backend
-func azure functionapp publish your-app-name
-```
+1. Create a new Web Service on Render.com
+2. Connect your GitHub repository
+3. Configure the following settings:
+   - Build Command: `pip install -r backend/requirements.txt`
+   - Start Command: `cd backend && gunicorn main:app --bind 0.0.0.0:$PORT --workers 4`
+4. Add the following environment variables:
+   - `CORS_ALLOWED_ORIGINS`: `https://portfolio-tagda.vercel.app,https://*.vercel.app`
+   - `HUGGINGFACE_API_KEY`: Your Hugging Face API key
+   - `SMTP_EMAIL`: Your email
+   - `SMTP_PASSWORD`: Your email password
+   - `SMTP_SERVER`: `smtp.gmail.com`
+   - `SMTP_PORT`: `587`
 
 ## Environment Variables
 
 ### Frontend (.env.local)
-- `NEXT_PUBLIC_BACKEND_URL`: Backend API URL
+- `NEXT_PUBLIC_BACKEND_URL`: Backend API URL (defaults to Render URL)
 
 ### Backend (.env)
 - `HUGGINGFACE_API_KEY`: Hugging Face API key
+- `SMTP_EMAIL`: Email for contact form
+- `SMTP_PASSWORD`: Email password
+- `SMTP_SERVER`: SMTP server (default: smtp.gmail.com)
+- `SMTP_PORT`: SMTP port (default: 587)
 
 ## Contributing
 
