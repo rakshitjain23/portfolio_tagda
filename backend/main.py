@@ -35,6 +35,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Simple test endpoint
+@app.get("/test")
+async def test():
+    return {"status": "ok", "message": "API is working!"}
+
 # Hugging Face API configuration
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"  # Changed to a better model for Q&A
