@@ -6,7 +6,7 @@ services:
     buildCommand: |
       echo "Starting build process..."
       python --version
-      python -m pip install --upgrade pip
+      python -m pip install --upgrade pip setuptools wheel
       pip --version
       echo "Installing requirements..."
       pip install --no-cache-dir -r requirements.txt
@@ -32,4 +32,6 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PYTHON_VERSION
-        value: "3.11.0" 
+        value: "3.11.0"
+      - key: PIP_NO_CACHE_DIR
+        value: "1" 
