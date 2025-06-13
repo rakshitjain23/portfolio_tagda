@@ -3,7 +3,9 @@ services:
     name: tagda-backend
     env: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
     startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 4
     envVars:
       - key: CORS_ALLOWED_ORIGINS
