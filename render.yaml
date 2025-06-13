@@ -5,7 +5,7 @@ services:
     rootDir: backend
     buildCommand: |
       python -m pip install --upgrade pip
-      pip install -r requirements.txt
+      pip install --no-cache-dir -r requirements.txt
     startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 4 --worker-class uvicorn.workers.UvicornWorker --timeout 600
     healthCheckPath: /test
     envVars:
@@ -22,4 +22,6 @@ services:
       - key: SMTP_PORT
         value: "587"
       - key: PYTHON_VERSION
-        value: "3.9.18" 
+        value: "3.9.7"
+      - key: PYTHONPATH
+        value: "/opt/render/project/src/backend" 
