@@ -36,7 +36,7 @@ cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://1
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["*"],  # Allow all origins temporarily to fix the issue
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -212,6 +212,11 @@ async def root():
         },
         "environment": get_environment_info()
     }
+
+@app.get("/ping")
+async def ping():
+    """Lightweight endpoint for uptime monitoring"""
+    return {"status": "pong", "timestamp": time.time()}
 
 @app.get("/health", response_model=HealthCheck)
 async def health_check():
