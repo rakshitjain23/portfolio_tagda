@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: tagda-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT --workers 4
+    envVars:
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://portfolio-tagda.vercel.app,https://*.vercel.app
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587" 
