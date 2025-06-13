@@ -36,7 +36,7 @@ cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://1
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["*"],  # Temporarily allow all origins until environment variable is set
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
