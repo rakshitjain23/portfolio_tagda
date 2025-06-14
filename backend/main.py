@@ -48,7 +48,8 @@ ALLOWED_ORIGINS = [
     "https://www.devrakshit.me",
     "https://portfolio-tagda.vercel.app",
     "https://portfolio-tagda-git-main-rakshitjain23.vercel.app",
-    "https://portfolio-tagda-rakshitjain23.vercel.app"
+    "https://portfolio-tagda-rakshitjain23.vercel.app",
+    "https://portfolio-tagda-git-main-rakshitjain23s-projects.vercel.app"
 ]
 
 # Get additional origins from environment variable (comma-separated)
