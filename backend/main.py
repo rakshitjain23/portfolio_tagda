@@ -158,7 +158,8 @@ def validate_request_security(request: Request) -> bool:
 
 def validate_api_key(request: Request) -> bool:
     """Validate API key - requires valid API key for sensitive endpoints"""
-    api_key = request.headers.get("X-API-Key")
+    # Check for both uppercase and lowercase versions of the header
+    api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
     sensitive_paths = ["/api/contact", "/api/chat"]
     if any(path in str(request.url) for path in sensitive_paths):
         if not api_key:
@@ -249,7 +250,7 @@ app.add_middleware(
     allow_origin_regex="|".join(ALLOWED_ORIGIN_REGEXES),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-API-Key"],
 )
 app.add_middleware(SecurityMiddleware)
 
