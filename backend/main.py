@@ -71,6 +71,9 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],  # Allow necessary headers
 )
 
+# Add comprehensive security middleware after CORS middleware
+app.add_middleware(SecurityMiddleware)
+
 # Configure rate limiter
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -833,6 +836,83 @@ async def internal_error_handler(request, exc):
         status_code=500,
         content={"message": "Internal server error", "status": "error"}
     )
+
+# Define the security_middleware function (without @app.middleware decorator)
+async def SecurityMiddleware(request: Request, call_next):
+    """Comprehensive security middleware to prevent bypasses"""
+    
+    # Allow OPTIONS requests (CORS preflight) to pass through unconditionally
+    # The CORSMiddleware will handle the necessary headers for OPTIONS requests
+    if request.method == "OPTIONS":
+        response = await call_next(request)
+        return response
+
+    # Get client IP
+    client_ip = get_real_ip(request)
+    
+    # Log all requests for monitoring
+    logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
+    
+    # 0. Check for suspicious requests first
+    if is_suspicious_request(request):
+        logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Request blocked for security reasons",
+                "status": "error"
+            }
+        )
+    
+    # 1. Validate request security
+    if not validate_request_security(request):
+        logger.warning(f"🚫 Security validation failed for {client_ip}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Request blocked for security reasons",
+                "status": "error"
+            }
+        )
+    
+    # 2. Check rate limiting by IP
+    if not check_rate_limit_by_ip(client_ip):
+        logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "Too Many Requests",
+                "message": "Rate limit exceeded",
+                "status": "error"
+            }
+        )
+    
+    # 3. Validate API key if provided
+    if not validate_api_key(request):
+        logger.warning(f"🚫 Invalid API key from {client_ip}")
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Unauthorized",
+                "message": "Invalid API key",
+                "status": "error"
+            }
+        )
+    
+    # Continue with the request
+    response = await call_next(request)
+    
+    # Add security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    
+    return response
 
 if __name__ == "__main__":
     import uvicorn
