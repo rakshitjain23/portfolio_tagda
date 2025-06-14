@@ -16,7 +16,6 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import html
 import re
-import hashlib
 import secrets
 from datetime import datetime, timedelta
 
@@ -43,271 +42,19 @@ app = FastAPI(
 
 # Security configuration global variables
 API_KEY = os.getenv("API_SECRET_KEY", secrets.token_urlsafe(32))
-RATE_LIMIT_WINDOW = 60  # seconds
-MAX_REQUESTS_PER_WINDOW = 10
-request_tracker = {}
-BLOCKED_IPS = set()
-SUSPICIOUS_PATTERNS = [
-    'rtucommunity.tech',
-    'testing.rtucommunity.tech',
-    'proxy',
-    'vpn',
-    'tor'
-]
 
-# CORS configuration
-ALLOWED_ORIGINS_STATIC = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/([a-zA-Z0-9\-]+\.)*vercel\.app$",
-    r"^https:\/\/(www\.)?devrakshit\.me$",
-]
-env_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
-if env_origins and env_origins[0]:
-    ALLOWED_ORIGINS_STATIC.extend([origin.strip() for origin in env_origins if origin.strip()])
-ALLOWED_ORIGINS_STATIC = list(set([origin for origin in ALLOWED_ORIGINS_STATIC if origin]))
+# --- Simple Security Functions ---
 
-# --- Helper Functions for Security Middleware (Defined before SecurityMiddleware) ---
+def validate_api_key_simple(request: Request) -> bool:
+    """Simple API key validation"""
+    api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
+    return api_key == API_KEY
 
-def get_real_ip(request: Request) -> str:
-    """Get the real IP address, accounting for proxies"""
-    real_ip_headers = [
-        'x-forwarded-for',
-        'x-real-ip',
-        'cf-connecting-ip',
-        'x-client-ip'
-    ]
-    for header in real_ip_headers:
-        if header in request.headers:
-            ip = request.headers[header].split(',')[0].strip()
-            if ip and ip != 'unknown':
-                return ip
+def get_client_ip_simple(request: Request) -> str:
+    """Simple IP extraction"""
     return request.client.host if request.client else "unknown"
 
-def is_suspicious_request(request: Request) -> bool:
-    """Check if request is suspicious based on multiple factors"""
-    real_ip = get_real_ip(request)
-    if real_ip in BLOCKED_IPS:
-        logger.warning(f"🚫 Request from blocked IP: {real_ip}")
-        return True
-    user_agent = request.headers.get('user-agent', '').lower()
-    legitimate_browsers = [
-        'mozilla', 'chrome', 'safari', 'firefox', 'edge', 'opera'
-    ]
-    if any(browser in user_agent for browser in legitimate_browsers):
-        pass
-    else:
-        for pattern in SUSPICIOUS_PATTERNS:
-            if pattern in user_agent:
-                logger.warning(f"🚫 Suspicious user agent pattern: {pattern}")
-                return True
-    if not user_agent or user_agent == 'unknown':
-        logger.warning("🚫 Missing or suspicious user agent")
-        return True
-    if real_ip in request_tracker and len(request_tracker[real_ip]) > 50:
-        logger.warning(f"🚫 Too many requests from IP: {real_ip}")
-        BLOCKED_IPS.add(real_ip)
-        return True
-    return False
-
-def validate_request_security(request: Request) -> bool:
-    """Validate request for security threats"""
-    suspicious_headers = [
-        'x-forwarded-for',
-        'x-real-ip',
-        'cf-connecting-ip',
-        'x-forwarded-proto',
-        'x-forwarded-host',
-        'x-original-host'
-    ]
-    for header in suspicious_headers:
-        if header in request.headers:
-            logger.warning(f"🚫 Suspicious header detected: {header}")
-            return False
-    if 'via' in request.headers or 'proxy' in request.headers.get('user-agent', '').lower():
-        logger.warning("🚫 Proxy request detected")
-        return False
-    
-    # Make host validation more flexible - allow missing or various formats
-    host = request.headers.get('host', '').lower()
-    if host:
-        # Allow various host formats for the same service
-        allowed_hosts = [
-            'portfolio-tagda.onrender.com',
-            'localhost',
-            '127.0.0.1',
-            'localhost:8000',
-            '127.0.0.1:8000'
-        ]
-        if not any(allowed in host for allowed in allowed_hosts):
-            logger.warning(f"🚫 Unauthorized host: {host}")
-            return False
-    
-    # Make referer validation optional - many legitimate requests don't have referer
-    referer = request.headers.get('referer', '').lower()
-    if referer:
-        # Only validate if referer is present
-        allowed_referers = [
-            'devrakshit.me',
-            'www.devrakshit.me',
-            'portfolio-tagda.vercel.app',
-            'localhost',
-            '127.0.0.1'
-        ]
-        if not any(allowed in referer for allowed in allowed_referers):
-            logger.warning(f"🚫 Unauthorized referer: {referer}")
-            return False
-    
-    blocked_domains = [
-        'rtucommunity.tech',
-        'testing.rtucommunity.tech',
-        'malicious-site.com',
-        'proxy-server.com'
-    ]
-    for header_name, header_value in request.headers.items():
-        header_value_lower = header_value.lower()
-        for blocked_domain in blocked_domains:
-            if blocked_domain in header_value_lower:
-                logger.warning(f"🚫 Blocked domain detected in {header_name}: {blocked_domain}")
-                return False
-    url_path = str(request.url).lower()
-    for blocked_domain in blocked_domains:
-        if blocked_domain in url_path:
-            logger.warning(f"🚫 Blocked domain in URL: {blocked_domain}")
-            return False
-    return True
-
-def validate_api_key(request: Request) -> bool:
-    """Validate API key - requires valid API key for sensitive endpoints"""
-    # Check for both uppercase and lowercase versions of the header
-    api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
-    sensitive_paths = ["/api/contact", "/api/chat"]
-    if any(path in str(request.url) for path in sensitive_paths):
-        if not api_key:
-            logger.warning("🚫 Missing API key for sensitive endpoint")
-            return False
-        if api_key != API_KEY:
-            logger.warning("🚫 Invalid API key")
-            return False
-    return True
-
-def check_rate_limit_by_ip(client_ip: str) -> bool:
-    """Additional rate limiting by IP"""
-    now = datetime.now()
-    if client_ip not in request_tracker:
-        request_tracker[client_ip] = []
-    request_tracker[client_ip] = [
-        req_time for req_time in request_tracker[client_ip]
-        if now - req_time < timedelta(seconds=RATE_LIMIT_WINDOW)
-    ]
-    if len(request_tracker[client_ip]) >= MAX_REQUESTS_PER_WINDOW:
-        return False
-    request_tracker[client_ip].append(now)
-    return True
-
-# --- SecurityMiddleware Definition (Defined after its dependencies) ---
-
-class SecurityMiddleware:
-    def __init__(self, app):
-        self.app = app
-
-    async def __call__(self, scope, receive, send):
-        """Comprehensive security middleware to prevent bypasses"""
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-        
-        # Create a request object for our validation functions
-        from starlette.requests import Request
-        request = Request(scope, receive)
-        
-        # Always allow OPTIONS requests to pass through for CORS preflight
-        if request.method == "OPTIONS":
-            await self.app(scope, receive, send)
-            return
-            
-        client_ip = get_real_ip(request)
-        logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
-        
-        # Re-enable security validation with fixes
-        if is_suspicious_request(request):
-            logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
-            from starlette.responses import JSONResponse
-            response = JSONResponse(
-                status_code=403,
-                content={
-                    "error": "Forbidden",
-                    "message": "Request blocked for security reasons",
-                    "status": "error"
-                }
-            )
-            # Add CORS headers to error responses
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
-            await response(scope, receive, send)
-            return
-            
-        if not validate_request_security(request):
-            logger.warning(f"🚫 Security validation failed for {client_ip}")
-            from starlette.responses import JSONResponse
-            response = JSONResponse(
-                status_code=403,
-                content={
-                    "error": "Forbidden",
-                    "message": "Request blocked for security reasons",
-                    "status": "error"
-                }
-            )
-            # Add CORS headers to error responses
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
-            await response(scope, receive, send)
-            return
-            
-        if not check_rate_limit_by_ip(client_ip):
-            logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
-            from starlette.responses import JSONResponse
-            response = JSONResponse(
-                status_code=429,
-                content={
-                    "error": "Too Many Requests",
-                    "message": "Rate limit exceeded",
-                    "status": "error"
-                }
-            )
-            # Add CORS headers to error responses
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
-            await response(scope, receive, send)
-            return
-            
-        if not validate_api_key(request):
-            logger.warning(f"🚫 Invalid API key from {client_ip}")
-            from starlette.responses import JSONResponse
-            response = JSONResponse(
-                status_code=401,
-                content={
-                    "error": "Unauthorized",
-                    "message": "Invalid API key",
-                    "status": "error"
-                }
-            )
-            # Add CORS headers to error responses
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
-            await response(scope, receive, send)
-            return
-        
-        # If all validations pass, continue with the request
-        await self.app(scope, receive, send)
-
-# --- Middleware Application (Order Matters!) ---
+# --- CORS Configuration (Simple and Effective) ---
 
 app.add_middleware(
     CORSMiddleware,
@@ -324,9 +71,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-API-Key"],
 )
-app.add_middleware(SecurityMiddleware)
 
-# Configure rate limiter (after app and middlewares are set up)
+# Configure rate limiter (simple approach)
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -414,7 +160,6 @@ def get_environment_info():
         "python_version": os.getenv("PYTHON_VERSION", "Unknown"),
         "port": os.getenv("PORT", "8000"),
         "environment": os.getenv("ENVIRONMENT", "development"),
-        "cors_origins": ALLOWED_ORIGINS_STATIC
     }
 
 def send_email_notification(name: str, email: EmailStr, message: str) -> bool:
@@ -532,6 +277,10 @@ async def health_check():
 async def contact(form: ContactForm, request: Request):
     """Handle contact form submissions"""
     try:
+        # Simple API key validation
+        if not validate_api_key_simple(request):
+            raise HTTPException(status_code=401, detail="Invalid API key")
+            
         logger.info(f"Contact form submission from {form.name} ({form.email})")
         if len(form.name) > 100 or len(form.message) > 1000:
             raise HTTPException(
@@ -575,6 +324,10 @@ async def contact(form: ContactForm, request: Request):
 async def chat(message: ChatMessage, request: Request):
     """Handle chat messages with AI responses"""
     try:
+        # Simple API key validation
+        if not validate_api_key_simple(request):
+            raise HTTPException(status_code=401, detail="Invalid API key")
+            
         if not message.message.strip():
             raise HTTPException(
                 status_code=400, 
@@ -813,6 +566,8 @@ Answer:"""
             status_code=500, 
             detail="An unexpected error occurred. Please try again later."
         )
+
+# --- OPTIONS Handlers for CORS ---
 
 @app.options("/api/contact")
 async def contact_options():
