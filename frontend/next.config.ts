@@ -10,7 +10,6 @@ const nextConfig = {
   
   // Performance optimizations
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['framer-motion', 'lucide-react', 'react-icons'],
   },
   
@@ -18,9 +17,6 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  
-  // Build optimizations
-  swcMinify: true,
   
   // TypeScript and ESLint
   typescript: {
