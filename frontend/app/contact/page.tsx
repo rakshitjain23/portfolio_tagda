@@ -30,7 +30,6 @@ export default function ContactPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "your-api-key-here",
         },
         body: JSON.stringify(formData),
       });
