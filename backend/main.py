@@ -102,12 +102,24 @@ async def security_middleware(request, call_next):
     """Comprehensive security middleware to prevent bypasses"""
     
     # Get client IP
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = get_real_ip(request)
     
     # Log all requests for monitoring
     logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
     
-    # 0. Check origin first (before other validations)
+    # 0. Check for suspicious requests first
+    if is_suspicious_request(request):
+        logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Request blocked for security reasons",
+                "status": "error"
+            }
+        )
+    
+    # 1. Check origin first (before other validations)
     origin = request.headers.get("origin")
     if origin and not is_origin_allowed(origin):
         logger.warning(f"🚫 CORS request blocked from unauthorized origin: {origin}")
@@ -120,7 +132,7 @@ async def security_middleware(request, call_next):
             }
         )
     
-    # 1. Validate request security
+    # 2. Validate request security
     if not validate_request_security(request):
         logger.warning(f"🚫 Security validation failed for {client_ip}")
         return JSONResponse(
@@ -132,7 +144,7 @@ async def security_middleware(request, call_next):
             }
         )
     
-    # 2. Check rate limiting by IP
+    # 3. Check rate limiting by IP
     if not check_rate_limit_by_ip(client_ip):
         logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
         return JSONResponse(
@@ -144,7 +156,7 @@ async def security_middleware(request, call_next):
             }
         )
     
-    # 3. Validate API key if provided
+    # 4. Validate API key if provided
     if not validate_api_key(request):
         logger.warning(f"🚫 Invalid API key from {client_ip}")
         return JSONResponse(
@@ -152,19 +164,6 @@ async def security_middleware(request, call_next):
             content={
                 "error": "Unauthorized",
                 "message": "Invalid API key",
-                "status": "error"
-            }
-        )
-    
-    # 4. Check for suspicious patterns
-    user_agent = request.headers.get("user-agent", "").lower()
-    if any(pattern in user_agent for pattern in ["curl", "wget", "python", "bot", "crawler"]):
-        logger.warning(f"🚫 Suspicious user agent: {user_agent}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Automated requests not allowed",
                 "status": "error"
             }
         )
@@ -194,6 +193,64 @@ MAX_REQUESTS_PER_WINDOW = 10
 
 # Request tracking for additional security
 request_tracker = {}
+
+# Blocked IPs and suspicious patterns
+BLOCKED_IPS = set()  # Will be populated from logs
+SUSPICIOUS_PATTERNS = [
+    'rtucommunity.tech',
+    'testing.rtucommunity.tech',
+    'proxy',
+    'vpn',
+    'tor'
+]
+
+def get_real_ip(request: Request) -> str:
+    """Get the real IP address, accounting for proxies"""
+    # Check for real IP in headers
+    real_ip_headers = [
+        'x-forwarded-for',
+        'x-real-ip',
+        'cf-connecting-ip',
+        'x-client-ip'
+    ]
+    
+    for header in real_ip_headers:
+        if header in request.headers:
+            ip = request.headers[header].split(',')[0].strip()
+            if ip and ip != 'unknown':
+                return ip
+    
+    # Fallback to client IP
+    return request.client.host if request.client else "unknown"
+
+def is_suspicious_request(request: Request) -> bool:
+    """Check if request is suspicious based on multiple factors"""
+    real_ip = get_real_ip(request)
+    
+    # Check if IP is blocked
+    if real_ip in BLOCKED_IPS:
+        logger.warning(f"🚫 Request from blocked IP: {real_ip}")
+        return True
+    
+    # Check user agent for suspicious patterns
+    user_agent = request.headers.get('user-agent', '').lower()
+    for pattern in SUSPICIOUS_PATTERNS:
+        if pattern in user_agent:
+            logger.warning(f"🚫 Suspicious user agent pattern: {pattern}")
+            return True
+    
+    # Check for missing or suspicious headers
+    if not user_agent or user_agent == 'unknown':
+        logger.warning("🚫 Missing or suspicious user agent")
+        return True
+    
+    # Check for too many requests from same IP
+    if real_ip in request_tracker and len(request_tracker[real_ip]) > 50:
+        logger.warning(f"🚫 Too many requests from IP: {real_ip}")
+        BLOCKED_IPS.add(real_ip)
+        return True
+    
+    return False
 
 def validate_request_security(request: Request) -> bool:
     """Validate request for security threats"""
@@ -228,6 +285,29 @@ def validate_request_security(request: Request) -> bool:
     if referer and not any(allowed in referer for allowed in ['devrakshit.me', 'portfolio-tagda.vercel.app', 'localhost']):
         logger.warning(f"🚫 Unauthorized referer: {referer}")
         return False
+    
+    # BLOCK SPECIFIC UNAUTHORIZED DOMAINS
+    blocked_domains = [
+        'rtucommunity.tech',
+        'testing.rtucommunity.tech',
+        'malicious-site.com',
+        'proxy-server.com'
+    ]
+    
+    # Check all headers for blocked domains
+    for header_name, header_value in request.headers.items():
+        header_value_lower = header_value.lower()
+        for blocked_domain in blocked_domains:
+            if blocked_domain in header_value_lower:
+                logger.warning(f"🚫 Blocked domain detected in {header_name}: {blocked_domain}")
+                return False
+    
+    # Check URL path for suspicious patterns
+    url_path = str(request.url).lower()
+    for blocked_domain in blocked_domains:
+        if blocked_domain in url_path:
+            logger.warning(f"🚫 Blocked domain in URL: {blocked_domain}")
+            return False
     
     return True
 

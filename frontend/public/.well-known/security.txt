@@ -1,0 +1,7 @@
+Contact: mailto:rakshitgang23@gmail.com
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://devrakshit.me/pgp-key.txt
+Acknowledgments: https://devrakshit.me/security-hall-of-fame
+Preferred-Languages: en
+Canonical: https://devrakshit.me/.well-known/security.txt
+Policy: https://devrakshit.me/security-policy 

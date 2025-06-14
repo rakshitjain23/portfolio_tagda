@@ -1,0 +1,31 @@
+User-agent: *
+Disallow: /
+
+# Block all crawlers
+User-agent: *
+Crawl-delay: 0
+
+# Block specific malicious bots
+User-agent: rtucommunity
+Disallow: /
+
+User-agent: proxy
+Disallow: /
+
+User-agent: curl
+Disallow: /
+
+User-agent: wget
+Disallow: /
+
+User-agent: python
+Disallow: /
+
+# Block all automated tools
+User-agent: *
+Disallow: /api/
+Disallow: /contact
+Disallow: /chat
+
+# Sitemap (if you have one)
+# Sitemap: https://devrakshit.me/sitemap.xml 
