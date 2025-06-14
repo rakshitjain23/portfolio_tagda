@@ -44,12 +44,14 @@ app = FastAPI(
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://devrakshit.me",
-    "https://www.devrakshit.me",
-    "https://portfolio-tagda.vercel.app",
-    "https://portfolio-tagda-git-main-rakshitjain23.vercel.app",
-    "https://portfolio-tagda-rakshitjain23.vercel.app",
-    "https://portfolio-tagda-git-main-rakshitjain23s-projects.vercel.app"
+    # Add other specific origins if needed
+]
+
+# Regex patterns for dynamic and subdomains
+ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/[a-zA-Z0-9\-]+\.vercel\.app$",
+    r"^https:\/\/(www\.)?devrakshit\.me$",
+    # Add other regex patterns for allowed origins if needed
 ]
 
 # Get additional origins from environment variable (comma-separated)
@@ -61,12 +63,20 @@ if env_origins and env_origins[0]:  # Only add if not empty
 ALLOWED_ORIGINS = list(set([origin for origin in ALLOWED_ORIGINS if origin]))
 
 def is_origin_allowed(origin: str) -> bool:
-    """Check if the origin is allowed based on our strict security rules"""
+    """Check if the origin is allowed based on our strict security rules (including regex)"""
     if not origin:
         return False
     
-    # Only allow exact matches from our whitelist
-    return origin in ALLOWED_ORIGINS
+    # Check exact matches from our whitelist
+    if origin in ALLOWED_ORIGINS:
+        return True
+    
+    # Check against regex patterns
+    for pattern in ALLOWED_ORIGIN_REGEXES:
+        if re.match(pattern, origin):
+            return True
+            
+    return False
 
 app.add_middleware(
     CORSMiddleware,
