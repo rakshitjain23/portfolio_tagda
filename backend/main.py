@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, WebSocket, Depends
+from fastapi import FastAPI, HTTPException, WebSocket, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
@@ -315,7 +315,7 @@ async def health_check():
 
 @app.post("/api/contact")
 @limiter.limit("5/minute")  # Allow 5 contact form submissions per minute
-async def contact(form: ContactForm, request):
+async def contact(form: ContactForm, request: Request):
     """Handle contact form submissions"""
     try:
         logger.info(f"Contact form submission from {form.name} ({form.email})")
@@ -369,7 +369,7 @@ async def contact(form: ContactForm, request):
 
 @app.post("/api/chat")
 @limiter.limit("10/minute")  # Allow 10 chat messages per minute
-async def chat(message: ChatMessage, request):
+async def chat(message: ChatMessage, request: Request):
     """Handle chat messages with AI responses"""
     try:
         if not message.message.strip():
