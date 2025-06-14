@@ -41,7 +41,7 @@ app = FastAPI(
 
 # Configure CORS - Strict security configuration
 # Only allow specific, known domains
-ALLOWED_ORIGINS = [
+ALLOWED_ORIGINS_STATIC = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     # Add other specific origins if needed
@@ -49,148 +49,27 @@ ALLOWED_ORIGINS = [
 
 # Regex patterns for dynamic and subdomains
 ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/[a-zA-Z0-9\-]+\.vercel\.app$",
+    r"^https:\/\/([a-zA-Z0-9\-]+\.)*vercel\.app$",
     r"^https:\/\/(www\.)?devrakshit\.me$",
     # Add other regex patterns for allowed origins if needed
 ]
 
-# Get additional origins from environment variable (comma-separated)
+# Get additional static origins from environment variable (comma-separated)
 env_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 if env_origins and env_origins[0]:  # Only add if not empty
-    ALLOWED_ORIGINS.extend([origin.strip() for origin in env_origins if origin.strip()])
+    ALLOWED_ORIGINS_STATIC.extend([origin.strip() for origin in env_origins if origin.strip()])
 
 # Remove duplicates and filter out empty strings
-ALLOWED_ORIGINS = list(set([origin for origin in ALLOWED_ORIGINS if origin]))
-
-def is_origin_allowed(origin: str) -> bool:
-    """Check if the origin is allowed based on our strict security rules (including regex)"""
-    if not origin:
-        return False
-    
-    # Check exact matches from our whitelist
-    if origin in ALLOWED_ORIGINS:
-        return True
-    
-    # Check against regex patterns
-    for pattern in ALLOWED_ORIGIN_REGEXES:
-        if re.match(pattern, origin):
-            return True
-            
-    return False
+ALLOWED_ORIGINS_STATIC = list(set([origin for origin in ALLOWED_ORIGINS_STATIC if origin]))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,  # Only exact matches from whitelist
+    allow_origins=ALLOWED_ORIGINS_STATIC,  # Static exact matches from whitelist
+    allow_origin_regex="|".join(ALLOWED_ORIGIN_REGEXES), # Dynamic regex matches
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],  # Allow OPTIONS for preflight requests
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],  # Allow necessary headers
 )
-
-# Add CORS debugging middleware
-@app.middleware("http")
-async def cors_debug_middleware(request, call_next):
-    origin = request.headers.get("origin")
-    if origin:
-        if is_origin_allowed(origin):
-            logger.info(f"✅ CORS request from allowed origin: {origin}")
-        else:
-            logger.warning(f"🚫 CORS request blocked from unauthorized origin: {origin}")
-            # Return 403 Forbidden for unauthorized origins
-            return JSONResponse(
-                status_code=403,
-                content={
-                    "error": "Forbidden",
-                    "message": "Origin not allowed",
-                    "status": "error"
-                }
-            )
-    response = await call_next(request)
-    return response
-
-# Add comprehensive security middleware
-@app.middleware("http")
-async def security_middleware(request, call_next):
-    """Comprehensive security middleware to prevent bypasses"""
-    
-    # Get client IP
-    client_ip = get_real_ip(request)
-    
-    # Log all requests for monitoring
-    logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
-    
-    # 0. Check for suspicious requests first
-    if is_suspicious_request(request):
-        logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Request blocked for security reasons",
-                "status": "error"
-            }
-        )
-    
-    # 1. Check origin first (before other validations)
-    origin = request.headers.get("origin")
-    if origin and not is_origin_allowed(origin):
-        logger.warning(f"🚫 CORS request blocked from unauthorized origin: {origin}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Origin not allowed",
-                "status": "error"
-            }
-        )
-    
-    # 2. Validate request security
-    if not validate_request_security(request):
-        logger.warning(f"🚫 Security validation failed for {client_ip}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Request blocked for security reasons",
-                "status": "error"
-            }
-        )
-    
-    # 3. Check rate limiting by IP
-    if not check_rate_limit_by_ip(client_ip):
-        logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "Too Many Requests",
-                "message": "Rate limit exceeded",
-                "status": "error"
-            }
-        )
-    
-    # 4. Validate API key if provided
-    if not validate_api_key(request):
-        logger.warning(f"🚫 Invalid API key from {client_ip}")
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error": "Unauthorized",
-                "message": "Invalid API key",
-                "status": "error"
-            }
-        )
-    
-    # Continue with the request
-    response = await call_next(request)
-    
-    # Add security headers
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-    
-    return response
 
 # Configure rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -448,7 +327,7 @@ def get_environment_info():
         "python_version": os.getenv("PYTHON_VERSION", "Unknown"),
         "port": os.getenv("PORT", "8000"),
         "environment": os.getenv("ENVIRONMENT", "development"),
-        "cors_origins": ALLOWED_ORIGINS
+        "cors_origins": ALLOWED_ORIGINS_STATIC
     }
 
 def send_email_notification(name: str, email: str, message: str) -> bool:
