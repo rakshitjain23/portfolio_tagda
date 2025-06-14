@@ -129,14 +129,37 @@ def validate_request_security(request: Request) -> bool:
     if 'via' in request.headers or 'proxy' in request.headers.get('user-agent', '').lower():
         logger.warning("🚫 Proxy request detected")
         return False
+    
+    # Make host validation more flexible - allow missing or various formats
     host = request.headers.get('host', '').lower()
-    if host and not any(allowed in host for allowed in ['portfolio-tagda.onrender.com', 'localhost', '127.0.0.1']):
-        logger.warning(f"🚫 Unauthorized host: {host}")
-        return False
+    if host:
+        # Allow various host formats for the same service
+        allowed_hosts = [
+            'portfolio-tagda.onrender.com',
+            'localhost',
+            '127.0.0.1',
+            'localhost:8000',
+            '127.0.0.1:8000'
+        ]
+        if not any(allowed in host for allowed in allowed_hosts):
+            logger.warning(f"🚫 Unauthorized host: {host}")
+            return False
+    
+    # Make referer validation optional - many legitimate requests don't have referer
     referer = request.headers.get('referer', '').lower()
-    if referer and not any(allowed in referer for allowed in ['devrakshit.me', 'portfolio-tagda.vercel.app', 'localhost']):
-        logger.warning(f"🚫 Unauthorized referer: {referer}")
-        return False
+    if referer:
+        # Only validate if referer is present
+        allowed_referers = [
+            'devrakshit.me',
+            'www.devrakshit.me',
+            'portfolio-tagda.vercel.app',
+            'localhost',
+            '127.0.0.1'
+        ]
+        if not any(allowed in referer for allowed in allowed_referers):
+            logger.warning(f"🚫 Unauthorized referer: {referer}")
+            return False
+    
     blocked_domains = [
         'rtucommunity.tech',
         'testing.rtucommunity.tech',
@@ -208,13 +231,7 @@ class SecurityMiddleware:
         client_ip = get_real_ip(request)
         logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
         
-        # TEMPORARILY DISABLE SECURITY VALIDATION FOR DEBUGGING
-        # TODO: Re-enable after frontend is working
-        await self.app(scope, receive, send)
-        return
-        
-        # Original security validation (commented out for now)
-        """
+        # Re-enable security validation with fixes
         if is_suspicious_request(request):
             logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
             from starlette.responses import JSONResponse
@@ -286,7 +303,6 @@ class SecurityMiddleware:
             response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
             await response(scope, receive, send)
             return
-        """
         
         # If all validations pass, continue with the request
         await self.app(scope, receive, send)
@@ -295,10 +311,18 @@ class SecurityMiddleware:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for debugging
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://devrakshit.me",
+        "https://www.devrakshit.me",
+        "https://portfolio-tagda.vercel.app",
+        "https://portfolio-tagda-git-main-rakshitjain23.vercel.app",
+        "https://portfolio-tagda-rakshitjain23.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],  # Allow all headers for debugging
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-API-Key"],
 )
 app.add_middleware(SecurityMiddleware)
 
