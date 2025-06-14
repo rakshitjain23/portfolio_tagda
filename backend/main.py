@@ -186,61 +186,65 @@ def check_rate_limit_by_ip(client_ip: str) -> bool:
 
 # --- SecurityMiddleware Definition (Defined after its dependencies) ---
 
-async def SecurityMiddleware(request: Request, call_next):
-    """Comprehensive security middleware to prevent bypasses"""
-    if request.method == "OPTIONS":
+class SecurityMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, request: Request, call_next):
+        """Comprehensive security middleware to prevent bypasses"""
+        if request.method == "OPTIONS":
+            response = await call_next(request)
+            return response
+        client_ip = get_real_ip(request)
+        logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
+        if is_suspicious_request(request):
+            logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "error": "Forbidden",
+                    "message": "Request blocked for security reasons",
+                    "status": "error"
+                }
+            )
+        if not validate_request_security(request):
+            logger.warning(f"🚫 Security validation failed for {client_ip}")
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "error": "Forbidden",
+                    "message": "Request blocked for security reasons",
+                    "status": "error"
+                }
+            )
+        if not check_rate_limit_by_ip(client_ip):
+            logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Too Many Requests",
+                    "message": "Rate limit exceeded",
+                    "status": "error"
+                }
+            )
+        if not validate_api_key(request):
+            logger.warning(f"🚫 Invalid API key from {client_ip}")
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "error": "Unauthorized",
+                    "message": "Invalid API key",
+                    "status": "error"
+                }
+            )
         response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
         return response
-    client_ip = get_real_ip(request)
-    logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
-    if is_suspicious_request(request):
-        logger.warning(f"🚫 Suspicious request blocked from {client_ip}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Request blocked for security reasons",
-                "status": "error"
-            }
-        )
-    if not validate_request_security(request):
-        logger.warning(f"🚫 Security validation failed for {client_ip}")
-        return JSONResponse(
-            status_code=403,
-            content={
-                "error": "Forbidden",
-                "message": "Request blocked for security reasons",
-                "status": "error"
-            }
-        )
-    if not check_rate_limit_by_ip(client_ip):
-        logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "Too Many Requests",
-                "message": "Rate limit exceeded",
-                "status": "error"
-            }
-        )
-    if not validate_api_key(request):
-        logger.warning(f"🚫 Invalid API key from {client_ip}")
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error": "Unauthorized",
-                "message": "Invalid API key",
-                "status": "error"
-            }
-        )
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-    return response
 
 # --- Middleware Application (Order Matters!) ---
 
