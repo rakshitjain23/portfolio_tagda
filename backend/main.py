@@ -11,6 +11,11 @@ import logging
 import requests
 from typing import List, Optional
 import time
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import html
+import re
 
 # Configure logging
 logging.basicConfig(
@@ -36,11 +41,27 @@ cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://1
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all origins until environment variable is set
+    allow_origins=cors_origins,  # Only allow specific origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],  # Only allow necessary methods
+    allow_headers=["Content-Type", "Authorization"],  # Only allow necessary headers
 )
+
+# Add security headers middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+# Configure rate limiter
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Models
 class ContactForm(BaseModel):
@@ -169,6 +190,22 @@ def send_email_notification(name: str, email: str, message: str) -> bool:
         logger.error(f"Error sending email: {e}")
         return False
 
+def sanitize_input(text: str) -> str:
+    """Sanitize user input to prevent XSS and injection attacks"""
+    if not text:
+        return ""
+    
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # Escape HTML entities
+    text = html.escape(text)
+    
+    # Remove potentially dangerous characters
+    text = re.sub(r'[<>"\']', '', text)
+    
+    return text.strip()
+
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -228,13 +265,25 @@ async def health_check():
     )
 
 @app.post("/api/contact")
-async def contact(form: ContactForm):
+@limiter.limit("5/minute")  # Allow 5 contact form submissions per minute
+async def contact(form: ContactForm, request):
     """Handle contact form submissions"""
     try:
         logger.info(f"Contact form submission from {form.name} ({form.email})")
         
+        # Validate input length
+        if len(form.name) > 100 or len(form.message) > 1000:
+            raise HTTPException(
+                status_code=400,
+                detail="Name or message too long"
+            )
+        
+        # Sanitize inputs
+        sanitized_name = sanitize_input(form.name)
+        sanitized_message = sanitize_input(form.message)
+        
         # Send email notification
-        email_sent = send_email_notification(form.name, form.email, form.message)
+        email_sent = send_email_notification(sanitized_name, form.email, sanitized_message)
         
         if not email_sent:
             logger.error("Failed to send email notification")
@@ -270,13 +319,21 @@ async def contact(form: ContactForm):
         )
 
 @app.post("/api/chat")
-async def chat(message: ChatMessage):
+@limiter.limit("10/minute")  # Allow 10 chat messages per minute
+async def chat(message: ChatMessage, request):
     """Handle chat messages with AI responses"""
     try:
         if not message.message.strip():
             raise HTTPException(
                 status_code=400, 
                 detail="Message cannot be empty"
+            )
+
+        # Validate message length
+        if len(message.message) > 500:
+            raise HTTPException(
+                status_code=400,
+                detail="Message too long (max 500 characters)"
             )
 
         logger.info(f"Chat message received: {message.message[:50]}...")
