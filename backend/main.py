@@ -323,21 +323,18 @@ def validate_request_security(request: Request) -> bool:
     return True
 
 def validate_api_key(request: Request) -> bool:
-    """Validate API key - temporarily optional for legitimate frontend"""
+    """Validate API key - requires valid API key for sensitive endpoints"""
     api_key = request.headers.get("X-API-Key")
     
-    # For sensitive endpoints, check API key if provided
+    # For sensitive endpoints, require API key
     sensitive_paths = ["/api/contact", "/api/chat"]
     if any(path in str(request.url) for path in sensitive_paths):
-        # If API key is provided, validate it
-        if api_key:
-            if api_key != API_KEY:
-                logger.warning("🚫 Invalid API key")
-                return False
-        # If no API key provided, allow for now (temporary)
-        # TODO: Set up proper API key in frontend environment
-        else:
-            logger.info("ℹ️ No API key provided, allowing for legitimate frontend")
+        if not api_key:
+            logger.warning("🚫 Missing API key for sensitive endpoint")
+            return False
+        if api_key != API_KEY:
+            logger.warning("🚫 Invalid API key")
+            return False
     
     return True
 
