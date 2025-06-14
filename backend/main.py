@@ -16,6 +16,9 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import html
 import re
+import hashlib
+import secrets
+from datetime import datetime, timedelta
 
 # Configure logging
 logging.basicConfig(
@@ -36,72 +39,197 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS - Updated for devrakshit.me domain
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com,https://portfolio-tagda.vercel.app,https://devrakshit.me,https://www.devrakshit.me,https://portfolio-tagda-git-main-rakshitjain23.vercel.app,https://portfolio-tagda-rakshitjain23.vercel.app").split(",")
+# Configure CORS - Strict security configuration
+# Only allow specific, known domains
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://devrakshit.me",
+    "https://www.devrakshit.me",
+    "https://portfolio-tagda.vercel.app",
+    "https://portfolio-tagda-git-main-rakshitjain23.vercel.app",
+    "https://portfolio-tagda-rakshitjain23.vercel.app"
+]
 
-# Function to check if origin is allowed
+# Get additional origins from environment variable (comma-separated)
+env_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+if env_origins and env_origins[0]:  # Only add if not empty
+    ALLOWED_ORIGINS.extend([origin.strip() for origin in env_origins if origin.strip()])
+
+# Remove duplicates and filter out empty strings
+ALLOWED_ORIGINS = list(set([origin for origin in ALLOWED_ORIGINS if origin]))
+
 def is_origin_allowed(origin: str) -> bool:
-    """Check if the origin is allowed based on our security rules"""
+    """Check if the origin is allowed based on our strict security rules"""
     if not origin:
         return False
     
-    # Always allow localhost for development
-    if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:"):
-        return True
-    
-    # Allow Vercel domains
-    if origin.endswith(".vercel.app"):
-        return True
-    
-    # Allow Render domains
-    if origin.endswith(".render.com"):
-        return True
-    
-    # Allow specific domains
-    allowed_domains = [
-        "devrakshit.me",
-        "www.devrakshit.me",
-        "portfolio-tagda.vercel.app"
-    ]
-    
-    for domain in allowed_domains:
-        if origin == f"https://{domain}" or origin == f"http://{domain}":
-            return True
-    
-    return False
+    # Only allow exact matches from our whitelist
+    return origin in ALLOWED_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.render\.com|https://devrakshit\.me|https://www\.devrakshit\.me|http://localhost:.*|http://127\.0\.0\.1:.*",
+    allow_origins=ALLOWED_ORIGINS,  # Only exact matches from whitelist
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],  # Allow OPTIONS for preflight requests
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],  # Allow necessary headers
 )
-
-# Add security headers middleware
-@app.middleware("http")
-async def add_security_headers(request, call_next):
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    return response
 
 # Add CORS debugging middleware
 @app.middleware("http")
 async def cors_debug_middleware(request, call_next):
     origin = request.headers.get("origin")
     if origin:
-        logger.info(f"CORS request from origin: {origin}")
+        if is_origin_allowed(origin):
+            logger.info(f"✅ CORS request from allowed origin: {origin}")
+        else:
+            logger.warning(f"🚫 CORS request blocked from unauthorized origin: {origin}")
+            # Return 403 Forbidden for unauthorized origins
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "error": "Forbidden",
+                    "message": "Origin not allowed",
+                    "status": "error"
+                }
+            )
     response = await call_next(request)
+    return response
+
+# Add comprehensive security middleware
+@app.middleware("http")
+async def security_middleware(request, call_next):
+    """Comprehensive security middleware to prevent bypasses"""
+    
+    # Get client IP
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Log all requests for monitoring
+    logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
+    
+    # 1. Validate request security
+    if not validate_request_security(request):
+        logger.warning(f"🚫 Security validation failed for {client_ip}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Request blocked for security reasons",
+                "status": "error"
+            }
+        )
+    
+    # 2. Check rate limiting by IP
+    if not check_rate_limit_by_ip(client_ip):
+        logger.warning(f"🚫 Rate limit exceeded for {client_ip}")
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "Too Many Requests",
+                "message": "Rate limit exceeded",
+                "status": "error"
+            }
+        )
+    
+    # 3. Validate API key if provided
+    if not validate_api_key(request):
+        logger.warning(f"🚫 Invalid API key from {client_ip}")
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Unauthorized",
+                "message": "Invalid API key",
+                "status": "error"
+            }
+        )
+    
+    # 4. Check for suspicious patterns
+    user_agent = request.headers.get("user-agent", "").lower()
+    if any(pattern in user_agent for pattern in ["curl", "wget", "python", "bot", "crawler"]):
+        logger.warning(f"🚫 Suspicious user agent: {user_agent}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Automated requests not allowed",
+                "status": "error"
+            }
+        )
+    
+    # Continue with the request
+    response = await call_next(request)
+    
+    # Add security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    
     return response
 
 # Configure rate limiter
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security configuration
+API_KEY = os.getenv("API_SECRET_KEY", secrets.token_urlsafe(32))
+RATE_LIMIT_WINDOW = 60  # seconds
+MAX_REQUESTS_PER_WINDOW = 10
+
+# Request tracking for additional security
+request_tracker = {}
+
+def validate_request_security(request: Request) -> bool:
+    """Validate request for security threats"""
+    # Check for suspicious headers
+    suspicious_headers = [
+        'x-forwarded-for',
+        'x-real-ip',
+        'cf-connecting-ip',
+        'x-forwarded-proto'
+    ]
+    
+    for header in suspicious_headers:
+        if header in request.headers:
+            logger.warning(f"🚫 Suspicious header detected: {header}")
+            return False
+    
+    # Check for proxy indicators
+    if 'via' in request.headers or 'proxy' in request.headers.get('user-agent', '').lower():
+        logger.warning("🚫 Proxy request detected")
+        return False
+    
+    return True
+
+def validate_api_key(request: Request) -> bool:
+    """Validate API key if provided"""
+    api_key = request.headers.get("X-API-Key")
+    if api_key:
+        return api_key == API_KEY
+    return True  # Allow requests without API key for now
+
+def check_rate_limit_by_ip(client_ip: str) -> bool:
+    """Additional rate limiting by IP"""
+    now = datetime.now()
+    if client_ip not in request_tracker:
+        request_tracker[client_ip] = []
+    
+    # Remove old requests
+    request_tracker[client_ip] = [
+        req_time for req_time in request_tracker[client_ip]
+        if now - req_time < timedelta(seconds=RATE_LIMIT_WINDOW)
+    ]
+    
+    # Check if too many requests
+    if len(request_tracker[client_ip]) >= MAX_REQUESTS_PER_WINDOW:
+        return False
+    
+    # Add current request
+    request_tracker[client_ip].append(now)
+    return True
 
 # Models
 class ContactForm(BaseModel):
@@ -182,7 +310,7 @@ def get_environment_info():
         "python_version": os.getenv("PYTHON_VERSION", "Unknown"),
         "port": os.getenv("PORT", "8000"),
         "environment": os.getenv("ENVIRONMENT", "development"),
-        "cors_origins": cors_origins
+        "cors_origins": ALLOWED_ORIGINS
     }
 
 def send_email_notification(name: str, email: str, message: str) -> bool:
