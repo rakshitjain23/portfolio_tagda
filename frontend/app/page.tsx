@@ -37,7 +37,8 @@ const floatingAnimation: Variants = {
   initial: { y: 0 },
   animate: {
     y: [-5, 5, -5],
-    transition: {
+    transition:
+     {
       duration: 4,
       ease: "easeInOut",
       repeat: Infinity,
@@ -78,7 +79,7 @@ export default function Home() {
                     className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent font-display inline-block"
                     variants={shouldReduceAnimations ? undefined : textVariants}
                   >
-                    Hi, I&apos;m{" "}
+                    Hi, I&apos;m&nbsp;
                   </motion.span>
                   <motion.span 
                     className="inline-block text-primary font-display"
