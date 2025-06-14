@@ -200,6 +200,7 @@ class SecurityMiddleware:
         from starlette.requests import Request
         request = Request(scope, receive)
         
+        # Always allow OPTIONS requests to pass through for CORS preflight
         if request.method == "OPTIONS":
             await self.app(scope, receive, send)
             return
@@ -218,6 +219,10 @@ class SecurityMiddleware:
                     "status": "error"
                 }
             )
+            # Add CORS headers to error responses
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
             await response(scope, receive, send)
             return
             
@@ -232,6 +237,10 @@ class SecurityMiddleware:
                     "status": "error"
                 }
             )
+            # Add CORS headers to error responses
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
             await response(scope, receive, send)
             return
             
@@ -246,6 +255,10 @@ class SecurityMiddleware:
                     "status": "error"
                 }
             )
+            # Add CORS headers to error responses
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
             await response(scope, receive, send)
             return
             
@@ -260,6 +273,10 @@ class SecurityMiddleware:
                     "status": "error"
                 }
             )
+            # Add CORS headers to error responses
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-API-Key"
             await response(scope, receive, send)
             return
         
@@ -270,11 +287,10 @@ class SecurityMiddleware:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS_STATIC,
-    allow_origin_regex="|".join(ALLOWED_ORIGIN_REGEXES),
+    allow_origins=["*"],  # Allow all origins for debugging
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-API-Key"],
+    allow_headers=["*"],  # Allow all headers for debugging
 )
 app.add_middleware(SecurityMiddleware)
 
@@ -765,6 +781,34 @@ Answer:"""
             status_code=500, 
             detail="An unexpected error occurred. Please try again later."
         )
+
+@app.options("/api/contact")
+async def contact_options():
+    """Handle CORS preflight for contact endpoint"""
+    return JSONResponse(
+        status_code=200,
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Origin, X-API-Key",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
+
+@app.options("/api/chat")
+async def chat_options():
+    """Handle CORS preflight for chat endpoint"""
+    return JSONResponse(
+        status_code=200,
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, Origin, X-API-Key",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
 
 # Error handlers
 @app.exception_handler(404)
