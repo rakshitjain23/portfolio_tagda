@@ -232,14 +232,25 @@ def is_suspicious_request(request: Request) -> bool:
         logger.warning(f"🚫 Request from blocked IP: {real_ip}")
         return True
     
-    # Check user agent for suspicious patterns
+    # Check user agent for suspicious patterns (but allow legitimate browsers)
     user_agent = request.headers.get('user-agent', '').lower()
-    for pattern in SUSPICIOUS_PATTERNS:
-        if pattern in user_agent:
-            logger.warning(f"🚫 Suspicious user agent pattern: {pattern}")
-            return True
     
-    # Check for missing or suspicious headers
+    # Allow legitimate browser user agents
+    legitimate_browsers = [
+        'mozilla', 'chrome', 'safari', 'firefox', 'edge', 'opera'
+    ]
+    
+    # If it's a legitimate browser, don't block based on user agent
+    if any(browser in user_agent for browser in legitimate_browsers):
+        pass  # Allow legitimate browsers
+    else:
+        # Check for suspicious patterns only in non-browser user agents
+        for pattern in SUSPICIOUS_PATTERNS:
+            if pattern in user_agent:
+                logger.warning(f"🚫 Suspicious user agent pattern: {pattern}")
+                return True
+    
+    # Check for missing user agent (suspicious)
     if not user_agent or user_agent == 'unknown':
         logger.warning("🚫 Missing or suspicious user agent")
         return True
@@ -274,13 +285,13 @@ def validate_request_security(request: Request) -> bool:
         logger.warning("🚫 Proxy request detected")
         return False
     
-    # Check Host header for unauthorized domains
+    # Check Host header for unauthorized domains (only if present)
     host = request.headers.get('host', '').lower()
     if host and not any(allowed in host for allowed in ['portfolio-tagda.onrender.com', 'localhost', '127.0.0.1']):
         logger.warning(f"🚫 Unauthorized host: {host}")
         return False
     
-    # Check Referer header
+    # Check Referer header (only if present)
     referer = request.headers.get('referer', '').lower()
     if referer and not any(allowed in referer for allowed in ['devrakshit.me', 'portfolio-tagda.vercel.app', 'localhost']):
         logger.warning(f"🚫 Unauthorized referer: {referer}")
