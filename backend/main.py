@@ -107,6 +107,19 @@ async def security_middleware(request, call_next):
     # Log all requests for monitoring
     logger.info(f"🔍 Request: {request.method} {request.url} from {client_ip}")
     
+    # 0. Check origin first (before other validations)
+    origin = request.headers.get("origin")
+    if origin and not is_origin_allowed(origin):
+        logger.warning(f"🚫 CORS request blocked from unauthorized origin: {origin}")
+        return JSONResponse(
+            status_code=403,
+            content={
+                "error": "Forbidden",
+                "message": "Origin not allowed",
+                "status": "error"
+            }
+        )
+    
     # 1. Validate request security
     if not validate_request_security(request):
         logger.warning(f"🚫 Security validation failed for {client_ip}")
@@ -189,7 +202,9 @@ def validate_request_security(request: Request) -> bool:
         'x-forwarded-for',
         'x-real-ip',
         'cf-connecting-ip',
-        'x-forwarded-proto'
+        'x-forwarded-proto',
+        'x-forwarded-host',
+        'x-original-host'
     ]
     
     for header in suspicious_headers:
@@ -202,14 +217,35 @@ def validate_request_security(request: Request) -> bool:
         logger.warning("🚫 Proxy request detected")
         return False
     
+    # Check Host header for unauthorized domains
+    host = request.headers.get('host', '').lower()
+    if host and not any(allowed in host for allowed in ['portfolio-tagda.onrender.com', 'localhost', '127.0.0.1']):
+        logger.warning(f"🚫 Unauthorized host: {host}")
+        return False
+    
+    # Check Referer header
+    referer = request.headers.get('referer', '').lower()
+    if referer and not any(allowed in referer for allowed in ['devrakshit.me', 'portfolio-tagda.vercel.app', 'localhost']):
+        logger.warning(f"🚫 Unauthorized referer: {referer}")
+        return False
+    
     return True
 
 def validate_api_key(request: Request) -> bool:
-    """Validate API key if provided"""
+    """Validate API key - now mandatory for sensitive endpoints"""
     api_key = request.headers.get("X-API-Key")
-    if api_key:
-        return api_key == API_KEY
-    return True  # Allow requests without API key for now
+    
+    # For sensitive endpoints, require API key
+    sensitive_paths = ["/api/contact", "/api/chat"]
+    if any(path in str(request.url) for path in sensitive_paths):
+        if not api_key:
+            logger.warning("🚫 Missing API key for sensitive endpoint")
+            return False
+        if api_key != API_KEY:
+            logger.warning("🚫 Invalid API key")
+            return False
+    
+    return True
 
 def check_rate_limit_by_ip(client_ip: str) -> bool:
     """Additional rate limiting by IP"""
