@@ -37,14 +37,45 @@ app = FastAPI(
 )
 
 # Configure CORS - Updated for devrakshit.me domain
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com,https://portfolio-tagda.vercel.app,https://devrakshit.me,https://www.devrakshit.me").split(",")
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app,https://*.render.com,https://portfolio-tagda.vercel.app,https://devrakshit.me,https://www.devrakshit.me,https://portfolio-tagda-git-main-rakshitjain23.vercel.app,https://portfolio-tagda-rakshitjain23.vercel.app").split(",")
+
+# Function to check if origin is allowed
+def is_origin_allowed(origin: str) -> bool:
+    """Check if the origin is allowed based on our security rules"""
+    if not origin:
+        return False
+    
+    # Always allow localhost for development
+    if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:"):
+        return True
+    
+    # Allow Vercel domains
+    if origin.endswith(".vercel.app"):
+        return True
+    
+    # Allow Render domains
+    if origin.endswith(".render.com"):
+        return True
+    
+    # Allow specific domains
+    allowed_domains = [
+        "devrakshit.me",
+        "www.devrakshit.me",
+        "portfolio-tagda.vercel.app"
+    ]
+    
+    for domain in allowed_domains:
+        if origin == f"https://{domain}" or origin == f"http://{domain}":
+            return True
+    
+    return False
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,  # Only allow specific origins
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.render\.com|https://devrakshit\.me|https://www\.devrakshit\.me|http://localhost:.*|http://127\.0\.0\.1:.*",
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # Only allow necessary methods
-    allow_headers=["Content-Type", "Authorization"],  # Only allow necessary headers
+    allow_methods=["GET", "POST", "OPTIONS"],  # Allow OPTIONS for preflight requests
+    allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],  # Allow necessary headers
 )
 
 # Add security headers middleware
@@ -56,6 +87,15 @@ async def add_security_headers(request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+# Add CORS debugging middleware
+@app.middleware("http")
+async def cors_debug_middleware(request, call_next):
+    origin = request.headers.get("origin")
+    if origin:
+        logger.info(f"CORS request from origin: {origin}")
+    response = await call_next(request)
     return response
 
 # Configure rate limiter
@@ -254,6 +294,15 @@ async def root():
 async def ping():
     """Lightweight endpoint for uptime monitoring"""
     return {"status": "pong", "timestamp": time.time()}
+
+@app.get("/test-cors")
+async def test_cors():
+    """Test endpoint to check CORS configuration"""
+    return {
+        "message": "CORS test successful",
+        "timestamp": time.time(),
+        "cors_enabled": True
+    }
 
 @app.get("/health", response_model=HealthCheck)
 async def health_check():
