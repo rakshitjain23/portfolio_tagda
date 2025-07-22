@@ -38,7 +38,7 @@ const floatingAnimation: Variants = {
   animate: {
     y: [-5, 5, -5],
     transition:
-     {
+    {
       duration: 4,
       ease: "easeInOut",
       repeat: Infinity,

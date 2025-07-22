@@ -98,6 +98,7 @@ PORTFOLIO_CONTEXT = """
 Rakshit Gang is a passionate Full Stack Developer with a strong focus on AI and web development. 
 He is currently pursuing his education while actively working on various projects.
 
+
 Journey:
 - Started web development journey with Angela Yu's Udemy course
 - Enhanced skills through Hitesh Choudhary's tutorials
@@ -124,11 +125,11 @@ Skills:
 
 Projects:
 1. Aashayein - A life-saving platform for blood and SDP donation in Jaipur
-   - Role: Developer and member of Aashayein - The Life Saviours club
-   - Started as a college initiative after being motivated by Director Arpit Sir
-   - Digitalized the blood donation system for Jaipur
-   - Handles blood and SDP requests for patients
-   - Also serves as a video and photo editor/grapher for the club
+- Role: Developer and member of Aashayein - The Life Saviours club
+- Started as a college initiative after being motivated by Director Arpit Sir
+- Digitalized the blood donation system for Jaipur
+- Handles blood and SDP requests for patients
+- Also serves as a video and photo editor/grapher for the club
 
 2. Rakshit Comm - Communication platform
 3. Rakun - AI chatbot
@@ -349,9 +350,9 @@ async def chat(message: ChatMessage, request: Request):
         message_lower = message.message.lower()
         if any(phrase in message_lower for phrase in ["journey", "how did you start", "your story", "how did you learn"]):
             response = "My journey in technology started with Angela Yu's comprehensive Udemy course, which gave me a solid foundation in web development. I further enhanced my skills through Hitesh Choudhary's tutorials, which helped me understand more advanced concepts.\n\n" + \
-                      "For mobile development, I learned Flutter from Rivaan Ranawat's YouTube channel, which opened up new possibilities for cross-platform app development. Currently, I'm strengthening my DSA skills through Take U Forward's resources, focusing on problem-solving and algorithmic thinking.\n\n" + \
-                      "A significant milestone in my journey was developing Aashayein, a life-saving platform for blood donation in Jaipur. This project combined my technical skills with a meaningful social cause, showing me how technology can make a real difference in people's lives.\n\n" + \
-                      "My learning journey is ongoing, and I'm always excited to explore new technologies and take on challenging projects. Would you like to know more about any specific part of my journey or the projects I've worked on?"
+                    "For mobile development, I learned Flutter from Rivaan Ranawat's YouTube channel, which opened up new possibilities for cross-platform app development. Currently, I'm strengthening my DSA skills through Take U Forward's resources, focusing on problem-solving and algorithmic thinking.\n\n" + \
+                    "A significant milestone in my journey was developing Aashayein, a life-saving platform for blood donation in Jaipur. This project combined my technical skills with a meaningful social cause, showing me how technology can make a real difference in people's lives.\n\n" + \
+                    "My learning journey is ongoing, and I'm always excited to explore new technologies and take on challenging projects. Would you like to know more about any specific part of my journey or the projects I've worked on?"
             for connection in active_connections:
                 try:
                     await connection.send_text("New question about Rakshit's journey! Would you like to know more about his learning path?")
@@ -379,12 +380,12 @@ async def chat(message: ChatMessage, request: Request):
             return {"response": response, "type": "hire"}
         elif any(phrase in message_lower for phrase in ["strengths", "what are you good at", "best at"]):
             response = "My key strengths include:\n\n" + \
-                      "1. Quick Learning: I rapidly adapt to new technologies and concepts\n" + \
-                      "2. Problem Solving: Strong DSA skills and analytical thinking\n" + \
-                      "3. Full Stack Development: Expertise in both frontend and backend\n" + \
-                      "4. Project Management: Successfully delivered multiple projects\n" + \
-                      "5. Open Source Contribution: Active participation in the developer community\n\n" + \
-                      "Would you like me to elaborate on any of these strengths?"
+                    "1. Quick Learning: I rapidly adapt to new technologies and concepts\n" + \
+                    "2. Problem Solving: Strong DSA skills and analytical thinking\n" + \
+                    "3. Full Stack Development: Expertise in both frontend and backend\n" + \
+                    "4. Project Management: Successfully delivered multiple projects\n" + \
+                    "5. Open Source Contribution: Active participation in the developer community\n\n" + \
+                    "Would you like me to elaborate on any of these strengths?"
             for connection in active_connections:
                 try:
                     await connection.send_text("Someone is asking about Rakshit's strengths! Would you like to know more about his capabilities?")
@@ -421,10 +422,10 @@ async def chat(message: ChatMessage, request: Request):
             return {"response": response, "type": "aashayein"}
         elif any(word in message_lower for word in ["contact", "email", "phone", "reach", "how can i contact"]):
             response = "You can contact Rakshit through:\n\n" + \
-                      "📧 Email: rakshitgang23@gmail.com\n" + \
-                      "📱 Phone: +91 7014518699\n" + \
-                      "📍 Location: Jaipur, India\n\n" + \
-                      "Feel free to reach out for any professional inquiries or opportunities!"
+                    "📧 Email: rakshitgang23@gmail.com\n" + \
+                    "📱 Phone: +91 7014518699\n" + \
+                    "📍 Location: Jaipur, India\n\n" + \
+                    "Feel free to reach out for any professional inquiries or opportunities!"
             for connection in active_connections:
                 try:
                     await connection.send_text("Someone is looking for Rakshit's contact information! Would you like to know how to reach him?")
@@ -483,7 +484,7 @@ Answer:"""
         }
         logger.info("Sending request to Hugging Face API...")
         response = requests.post(
-            "https://api-inference.huggingface.co/models/google/flan-t5-base", 
+            "https://api-inference.huggingface.co/models/google/flan-t5-base",
             headers=headers, 
             json=payload,
             timeout=30
@@ -493,35 +494,35 @@ Answer:"""
             if any(word in message_lower for word in ["skill", "expertise", "technology", "tech"]):
                 return {
                     "response": "Rakshit is a Full Stack Developer with expertise in:\n\n" +
-                              "Frontend: React, Next.js, TypeScript, Tailwind CSS\n" +
-                              "Backend: Node.js, Express, Python, FastAPI\n" +
-                              "Mobile: Flutter\n" +
-                              "Database: MongoDB, PostgreSQL\n" +
-                              "AI/ML: TensorFlow, PyTorch, OpenAI\n" +
-                              "DSA: Problem solving, Algorithms, Data Structures\n\n" +
-                              "Would you like to know more about any specific technology?",
+                            "Frontend: React, Next.js, TypeScript, Tailwind CSS\n" +
+                            "Backend: Node.js, Express, Python, FastAPI\n" +
+                            "Mobile: Flutter\n" +
+                            "Database: MongoDB, PostgreSQL\n" +
+                            "AI/ML: TensorFlow, PyTorch, OpenAI\n" +
+                            "DSA: Problem solving, Algorithms, Data Structures\n\n" +
+                            "Would you like to know more about any specific technology?",
                     "type": "skills"
                 }
             elif any(word in message_lower for word in ["project", "work", "application", "app"]):
                 return {
                     "response": "Rakshit has worked on several notable projects:\n\n" +
-                              "1. Aashayein - A life-saving platform for blood and SDP donation in Jaipur\n" +
-                              "2. Rakshit Comm - Communication platform\n" +
-                              "3. Rakun - AI chatbot\n" +
-                              "4. FurniHaven - E-commerce platform\n\n" +
-                              "Which project would you like to learn more about?",
+                            "1. Aashayein - A life-saving platform for blood and SDP donation in Jaipur\n" +
+                            "2. Rakshit Comm - Communication platform\n" +
+                            "3. Rakun - AI chatbot\n" +
+                            "4. FurniHaven - E-commerce platform\n\n" +
+                            "Which project would you like to learn more about?",
                     "type": "projects"
                 }
             else:
                 return {
                     "response": "I can help you learn about:\n\n" +
-                              "1. Rakshit's technical skills and expertise\n" +
-                              "2. His projects and their details\n" +
-                              "3. His professional experience\n" +
-                              "4. How to contact him\n" +
-                              "5. His DSA and open source contributions\n" +
-                              "6. His journey in technology\n\n" +
-                              "What would you like to know more about?",
+                            "1. Rakshit's technical skills and expertise\n" +
+                            "2. His projects and their details\n" +
+                            "3. His professional experience\n" +
+                            "4. How to contact him\n" +
+                            "5. His DSA and open source contributions\n" +
+                            "6. His journey in technology\n\n" +
+                            "What would you like to know more about?",
                     "type": "general"
                 }
         response_data = response.json()
