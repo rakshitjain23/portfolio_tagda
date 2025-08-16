@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { usePerformanceOptimization } from "@/components/performance-optimizer";
+import { usePerformanceOptimization } from "../components/performance-optimizer";
 
 // Optimized text animation variants
 const textVariants: Variants = {

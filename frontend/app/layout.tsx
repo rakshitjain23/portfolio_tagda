@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font";
-import { ThemeProvider } from "@/components/theme-provider";
-import Navbar from "@/components/layout/navbar";
-import AnimatedBackground from "@/components/animated-background";
-import Chatbot from "@/components/chatbot";
+import { ThemeProvider } from "../components/theme-provider";
+import Navbar from "../components/layout/navbar";
+import AnimatedBackground from "../components/animated-background";
+import Chatbot from "../components/chatbot";
 import "./globals.css";
-import SmoothScroll from "@/components/smooth-scroll";
+import SmoothScroll from "../components/smooth-scroll";
 
 export const metadata: Metadata = {
   title: "Rakshit Jain - Portfolio",

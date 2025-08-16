@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "../../lib/utils";
+import { ThemeToggle } from "../theme-toggle";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
