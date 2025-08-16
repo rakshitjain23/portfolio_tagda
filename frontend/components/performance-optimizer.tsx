@@ -59,7 +59,8 @@ export function usePerformanceOptimization() {
         const entries = list.getEntries();
         entries.forEach((entry) => {
           if (entry.entryType === "first-input") {
-            setPerformanceMetrics(prev => ({ ...prev, fid: entry.processingStart - entry.startTime }));
+            const firstInputEntry = entry as PerformanceEventTiming;
+            setPerformanceMetrics(prev => ({ ...prev, fid: firstInputEntry.processingStart - firstInputEntry.startTime }));
           }
         });
       });
@@ -166,4 +167,4 @@ export function useThrottle<T>(value: T, limit: number): T {
   }, [value, limit]);
 
   return throttledValue;
-} 
+}
