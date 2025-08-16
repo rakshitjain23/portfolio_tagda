@@ -307,31 +307,31 @@ export default function Home() {
                          </span>
                        </div>
 
-                       {/* Links */}
-                       <div className="flex flex-col gap-2 pt-2">
-                         <a 
-                           href="https://bunkify.netlify.app" 
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
-                         >
-                           <span>Demo - bunkify.netlify.app</span>
-                           <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                         </a>
-                         <a 
-                           href="https://github.com/hacknrollers/bunkify" 
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 text-sm"
-                         >
-                           <span>GitHub Repo - You can also contribute!</span>
-                           <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                         </a>
-                       </div>
+                                               {/* Links */}
+                        <div className="flex flex-col gap-2 pt-2 relative z-10">
+                          <a 
+                            href="https://bunkify.netlify.app" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm cursor-pointer"
+                          >
+                            <span>Demo - Live Website</span>
+                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </a>
+                          <a 
+                            href="https://github.com/hacknrollers/bunkify" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 text-sm cursor-pointer"
+                          >
+                            <span>GitHub Repo - You can also contribute!</span>
+                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </a>
+                        </div>
                      </div>
 
                      {/* Hover Effect Overlay */}
-                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl pointer-events-none" />
                    </div>
                  </motion.div>
 
@@ -380,12 +380,12 @@ export default function Home() {
                         </div>
 
                         {/* Action Button */}
-                        <div className="flex justify-end pt-2">
+                        <div className="flex justify-end pt-2 relative z-10">
                           <a 
                             href="https://github.com/rakshitjain23/Fake-News-Prediction" 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm cursor-pointer"
                           >
                             <span>View Project</span>
                             <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
@@ -443,12 +443,12 @@ export default function Home() {
                         </div>
 
                         {/* Action Button */}
-                        <div className="flex justify-end pt-2">
+                        <div className="flex justify-end pt-2 relative z-10">
                           <a 
                             href="https://thelifesaviours.org" 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm cursor-pointer"
                           >
                             <span>View Project</span>
                             <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
