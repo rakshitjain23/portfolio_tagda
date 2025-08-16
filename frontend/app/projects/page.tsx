@@ -16,7 +16,7 @@ const projects = [
     title: "Bunkify",
     description: "Currently working on a smart attendance tracker & bunk planner for students. Built with Next.js, Tailwind CSS, and Framer Motion. Features AI-powered attendance insights and Google Drive integration.",
     category: "Web",
-    image: "/projects/mentorship.png", // Using mentorship image as placeholder for now
+    image: "/projects/bunkify.png",
     github: "https://github.com/rakshitjain23/bunkify",
     demo: "https://bunkify.netlify.app",
     technologies: ["Next.js 15", "React 19", "Tailwind CSS", "Framer Motion", "AI"],
@@ -27,7 +27,7 @@ const projects = [
     title: "Fake News Prediction Model",
     description: "Machine learning model using Logistic Regression to classify news articles as Real or Fake. Achieved 95.28% accuracy with TF-IDF vectorization and NLTK preprocessing.",
     category: "AI",
-    image: "/projects/mentorship.png", // Using existing image as placeholder
+    image: "/projects/fakenews.png",
     github: "https://github.com/rakshitjain23/Fake-News-Prediction",
     demo: null,
     technologies: ["Python", "Scikit-learn", "NLTK", "NumPy", "Pandas", "Logistic Regression"],
@@ -35,9 +35,9 @@ const projects = [
   {
     id: 3,
     title: "Linear Regression from Scratch",
-    description: "Implemented Linear Regression using only NumPy and Matplotlib, based on Week 1 of Andrew Ng's Machine Learning Course. Features gradient descent and custom cost function.",
+    description: "Implemented Linear Regression for house price predictionusing only NumPy and Matplotlib, based on Week 1 of Andrew Ng's Machine Learning Course. Features gradient descent and custom cost function.",
     category: "AI",
-    image: "/projects/mentorship.png", // Using existing image as placeholder
+    image: "/projects/linear.png",
     github: "https://github.com/rakshitjain23/linear-regression",
     demo: null,
     technologies: ["Python", "NumPy", "Matplotlib", "Machine Learning", "Andrew Ng Course"],
