@@ -13,6 +13,37 @@ const categories = ["All", "Web", "Mobile", "AI"];
 const projects = [
   {
     id: 1,
+    title: "Bunkify",
+    description: "Currently working on a smart attendance tracker & bunk planner for students. Built with Next.js, Tailwind CSS, and Framer Motion. Features AI-powered attendance insights and Google Drive integration.",
+    category: "Web",
+    image: "/projects/mentorship.png", // Using mentorship image as placeholder for now
+    github: "https://github.com/rakshitjain23/bunkify",
+    demo: "https://bunkify.netlify.app",
+    technologies: ["Next.js 15", "React 19", "Tailwind CSS", "Framer Motion", "AI"],
+    featured: false,
+  },
+  {
+    id: 2,
+    title: "Fake News Prediction Model",
+    description: "Machine learning model using Logistic Regression to classify news articles as Real or Fake. Achieved 95.28% accuracy with TF-IDF vectorization and NLTK preprocessing.",
+    category: "AI",
+    image: "/projects/mentorship.png", // Using existing image as placeholder
+    github: "https://github.com/rakshitjain23/Fake-News-Prediction",
+    demo: null,
+    technologies: ["Python", "Scikit-learn", "NLTK", "NumPy", "Pandas", "Logistic Regression"],
+  },
+  {
+    id: 3,
+    title: "Linear Regression from Scratch",
+    description: "Implemented Linear Regression using only NumPy and Matplotlib, based on Week 1 of Andrew Ng's Machine Learning Course. Features gradient descent and custom cost function.",
+    category: "AI",
+    image: "/projects/mentorship.png", // Using existing image as placeholder
+    github: "https://github.com/rakshitjain23/linear-regression",
+    demo: null,
+    technologies: ["Python", "NumPy", "Matplotlib", "Machine Learning", "Andrew Ng Course"],
+  },
+  {
+    id: 4,
     title: "Aashayein",
     description: "Website for college social club - The Life Saviours.",
     category: "Web",
@@ -22,17 +53,17 @@ const projects = [
     technologies: ["HTML", "CSS", "JavaScript"],
   },
   {
-    id: 2,
+    id: 5,
     title: "Rakshit Communication",
     description: "Website for an electronics shop with modern design.",
     category: "Web",
     image: "/projects/rakshit-comm.png",
     github: "https://github.com/rakshitjain23/rakshit_communication",
-    demo: "https://rakshit-communication.vercel.app/",
+    demo: "https://rakshitjain23.github.io/rakshit_communication/",
     technologies: ["TypeScript", "Next.js", "React"],
   },
   {
-    id: 3,
+    id: 6,
     title: "Rakun Voice Assistant",
     description: "A smart voice assistant powered by Google Gemini AI.",
     category: "AI",
@@ -42,7 +73,7 @@ const projects = [
     technologies: ["Dart", "Flutter", "Google Gemini AI"],
   },
   {
-    id: 4,
+    id: 7,
     title: "FurniHaven Website",
     description: "A modern furniture e-commerce website with beautiful UI.",
     category: "Web",
@@ -52,7 +83,7 @@ const projects = [
     technologies: ["HTML", "CSS", "JavaScript"],
   },
   {
-    id: 5,
+    id: 8,
     title: "MentorshipPro",
     description: "An educational platform for mentorship and learning.",
     category: "Web",
@@ -62,7 +93,7 @@ const projects = [
     technologies: ["HTML", "CSS", "JavaScript"],
   },
   {
-    id: 6,
+    id: 9,
     title: "Mavericks",
     description: "Smart India Hackathon project website.",
     category: "Web",
@@ -72,7 +103,7 @@ const projects = [
     technologies: ["HTML", "CSS", "JavaScript"],
   },
   {
-    id: 7,
+    id: 10,
     title: "Quiz App",
     description: "An interactive quiz application with Flutter.",
     category: "Mobile",
@@ -82,7 +113,7 @@ const projects = [
     technologies: ["Dart", "Flutter"],
   },
   {
-    id: 8,
+    id: 11,
     title: "Shopping Cart App",
     description: "A shopping cart application with state management in Flutter.",
     category: "Mobile",
@@ -92,7 +123,7 @@ const projects = [
     technologies: ["Dart", "Flutter"],
   },
   {
-    id: 9,
+    id: 12,
     title: "Bootstrap Website",
     description: "My first website built during Angela Yu's Web Development course.",
     category: "Web",
@@ -102,7 +133,7 @@ const projects = [
     technologies: ["HTML", "CSS", "Bootstrap"],
   },
   {
-    id: 10,
+    id: 13,
     title: "TinDog Website",
     description: "A fun website for dog lovers, built during web development learning.",
     category: "Web",

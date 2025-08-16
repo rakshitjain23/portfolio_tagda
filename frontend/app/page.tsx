@@ -110,7 +110,7 @@ export default function Home() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                 >
-                  Full Stack Developer | AI Enthusiast | DSA Learner | Open Source Contributor
+                  🚀 Full Stack Developer | AI/ML Explorer | Open Source Contributor
                 </motion.p>
               </div>
               <motion.p 
@@ -119,7 +119,7 @@ export default function Home() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
-                Specializing in Next.js, React, Node.js, Python, and C++. Currently learning Data Structures & Algorithms and diving into AI development. Building and deploying scalable applications on Vercel, Hostinger, and GitHub.
+                Currently leading the <strong className="text-primary">Bunkify organization</strong> and diving deep into AI/ML through Andrew Ng&apos;s courses. Built Fake News Prediction Model (95.28% accuracy) and Linear Regression from scratch. Specializing in Next.js, React, Node.js, Python, and machine learning. Building innovative solutions that make a difference in student life and beyond.
               </motion.p>
               <motion.div 
                 className="flex flex-col sm:flex-row gap-4"
@@ -165,6 +165,26 @@ export default function Home() {
                   <span className="sr-only">LinkedIn</span>
                 </a>
               </motion.div>
+
+              {/* GitHub Foundation Certification Badge */}
+              <motion.a 
+                href="https://www.credly.com/badges/80009eed-8879-4b86-8a96-6c6386c36706/public_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-lg border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                  <span className="text-primary-foreground font-bold text-sm">🏆</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-primary group-hover:text-primary/90 transition-colors">GitHub Foundation Certified</p>
+                  <p className="text-xs text-muted-foreground">Click to verify on Credly</p>
+                </div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse group-hover:animate-bounce" />
+              </motion.a>
             </motion.div>
             <motion.div 
               className="flex-shrink-0 relative"
@@ -192,82 +212,275 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* Optimized Featured Section */}
-          <motion.section 
-            className="py-12"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <div className="space-y-4">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent font-display">Featured Projects</h2>
-              <p className="text-muted-foreground font-light">Some of my recent work that I&apos;m proud of.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-              <motion.div 
-                whileHover={shouldReduceAnimations ? undefined : { y: -5, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="group rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden backdrop-blur-sm bg-opacity-50"
-              >
-                <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-semibold font-display">Aashayein - Life Savers</h3>
-                  <p className="text-sm text-muted-foreground font-light">A life-saving platform for blood donation in Jaipur, connecting donors with patients in need.</p>
-                  <div className="flex justify-end">
-                    <a 
-                      href="https://github.com/rakshitjain23/aashayein" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary inline-flex items-center hover:underline group-hover:translate-x-1 transition-transform"
-                    >
-                      View Project <ArrowRight className="ml-1 h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
+                     {/* Creative Featured Projects Section */}
+           <motion.section 
+             className="py-16 relative"
+             initial={{ opacity: 0, y: 30 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.8, duration: 0.6 }}
+           >
+             {/* Creative Background Elements */}
+             <div className="absolute inset-0 -z-10 overflow-hidden">
+               <div className="absolute top-0 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+               <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-secondary/5 rounded-full blur-2xl" />
+               <div className="absolute top-1/2 left-0 w-24 h-24 bg-primary/3 rounded-full blur-xl" />
+             </div>
 
-              <motion.div 
-                whileHover={shouldReduceAnimations ? undefined : { y: -5, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="group rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden backdrop-blur-sm bg-opacity-50"
-              >
-                <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-semibold font-display">Rakun Voice Assistant</h3>
-                  <p className="text-sm text-muted-foreground font-light">A smart voice assistant powered by Google Gemini AI, built with Flutter.</p>
-                  <div className="flex justify-end">
-                    <a 
-                      href="https://github.com/rakshitjain23/rakun-voice-assistant" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary inline-flex items-center hover:underline group-hover:translate-x-1 transition-transform"
-                    >
-                      View Project <ArrowRight className="ml-1 h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
+             {/* Section Header with Creative Design */}
+             <div className="text-center mb-16 relative">
+               <motion.div 
+                 className="inline-flex items-center gap-3 mb-6"
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ delay: 0.9, duration: 0.6 }}
+               >
+                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                 <div className="w-1 h-1 bg-primary/60 rounded-full animate-pulse delay-75" />
+                 <div className="w-1 h-1 bg-primary/40 rounded-full animate-pulse delay-150" />
+               </motion.div>
+               <motion.h2 
+                 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent font-display mb-4"
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 1.0, duration: 0.6 }}
+               >
+                 Featured Projects
+               </motion.h2>
+               <motion.p 
+                 className="text-lg text-muted-foreground font-light max-w-2xl mx-auto"
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 1.1, duration: 0.6 }}
+               >
+                 Crafting digital experiences that blend innovation with purpose. Each project tells a story of growth and creativity.
+               </motion.p>
+             </div>
 
-              <motion.div 
-                whileHover={shouldReduceAnimations ? undefined : { y: -5, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="group rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden backdrop-blur-sm bg-opacity-50"
-              >
-                <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-semibold font-display">FurniHaven E-commerce</h3>
-                  <p className="text-sm text-muted-foreground font-light">A modern e-commerce platform for furniture with advanced features and responsive design.</p>
-                  <div className="flex justify-end">
-                    <a 
-                      href="https://github.com/rakshitjain23/furnihaven" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary inline-flex items-center hover:underline group-hover:translate-x-1 transition-transform"
-                    >
-                      View Project <ArrowRight className="ml-1 h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.section>
+                                                       {/* Creative Project Cards Grid */}
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                                {/* Bunkify - Compact Featured Project */}
+                 <motion.div 
+                   className="group relative"
+                   initial={{ opacity: 0, x: -30 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ delay: 1.2, duration: 0.6 }}
+                 >
+                   <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-card via-card to-card/80 text-card-foreground shadow-lg backdrop-blur-sm bg-opacity-50 group-hover:shadow-primary/20 transition-all duration-500">
+                     {/* Floating Elements */}
+                     <div className="absolute top-3 right-3 w-2 h-2 bg-primary/60 rounded-full animate-bounce delay-100" />
+                     <div className="absolute top-6 right-6 w-1.5 h-1.5 bg-secondary/60 rounded-full animate-bounce delay-200" />
+                     
+                     <div className="p-6 space-y-4">
+                       {/* Project Header */}
+                       <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md">
+                           <span className="text-lg">🚀</span>
+                         </div>
+                         <div className="flex-1">
+                           <h3 className="text-lg font-bold font-display bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                             Bunkify
+                           </h3>
+                           <p className="text-xs text-muted-foreground font-medium">Smart Attendance Tracker</p>
+                         </div>
+                         <div className="flex items-center gap-1.5">
+                           <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                           <span className="text-xs text-green-600 dark:text-green-400 font-medium">Active</span>
+                         </div>
+                       </div>
+
+                       {/* Project Description */}
+                       <p className="text-sm text-muted-foreground font-light leading-relaxed">
+                         Leading development of a revolutionary attendance tracker & bunk planner for students. 
+                         Built with Next.js 15, React 19, and AI-powered insights.
+                       </p>
+
+                       {/* Tech Stack */}
+                       <div className="flex flex-wrap gap-2">
+                         <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                           Next.js 15
+                         </span>
+                         <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                           React 19
+                         </span>
+                         <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary/10 px-2 py-1 text-xs font-medium text-secondary">
+                           AI-Powered
+                         </span>
+                       </div>
+
+                       {/* Links */}
+                       <div className="flex flex-col gap-2 pt-2">
+                         <a 
+                           href="https://bunkify.netlify.app" 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
+                         >
+                           <span>Demo - bunkify.netlify.app</span>
+                           <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                         </a>
+                         <a 
+                           href="https://github.com/hacknrollers/bunkify" 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-secondary/25 transition-all duration-300 hover:scale-105 text-sm"
+                         >
+                           <span>GitHub Repo - You can also contribute!</span>
+                           <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                         </a>
+                       </div>
+                     </div>
+
+                     {/* Hover Effect Overlay */}
+                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                   </div>
+                 </motion.div>
+
+                                                                 {/* Fake News Detection Model Project */}
+                  <motion.div 
+                    className="group relative"
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.3, duration: 0.6 }}
+                  >
+                    <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-card via-card to-card/80 text-card-foreground shadow-lg backdrop-blur-sm bg-opacity-50 group-hover:shadow-primary/20 transition-all duration-500">
+                      {/* Floating Elements */}
+                      <div className="absolute top-3 right-3 w-2 h-2 bg-primary/60 rounded-full animate-bounce delay-100" />
+                      <div className="absolute top-6 right-6 w-1.5 h-1.5 bg-secondary/60 rounded-full animate-bounce delay-200" />
+                      
+                      <div className="p-6 space-y-4">
+                        {/* Project Header */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md">
+                            <span className="text-lg">🤖</span>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold font-display bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                              Fake News Detection
+                            </h3>
+                            <p className="text-xs text-muted-foreground font-medium">AI/ML Model (95.28% accuracy)</p>
+                          </div>
+                        </div>
+
+                        {/* Project Description */}
+                        <p className="text-sm text-muted-foreground font-light leading-relaxed">
+                          Built a machine learning model that detects fake news with 95.28% accuracy using Python, scikit-learn, and NLP techniques.
+                        </p>
+
+                        {/* Tech Stack */}
+                        <div className="flex flex-wrap gap-2">
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                            Python
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                            Scikit-learn
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary/10 px-2 py-1 text-xs font-medium text-secondary">
+                            NLP
+                          </span>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex justify-end pt-2">
+                          <a 
+                            href="https://github.com/rakshitjain23/Fake-News-Prediction" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
+                          >
+                            <span>View Project</span>
+                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Hover Effect Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                    </div>
+                  </motion.div>
+
+                                 {/* Aashayein Project */}
+                  <motion.div 
+                    className="group relative"
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.4, duration: 0.6 }}
+                  >
+                    <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-card via-card to-card/80 text-card-foreground shadow-lg backdrop-blur-sm bg-opacity-50 group-hover:shadow-primary/20 transition-all duration-500">
+                      {/* Floating Elements */}
+                      <div className="absolute top-3 right-3 w-2 h-2 bg-primary/60 rounded-full animate-bounce delay-100" />
+                      <div className="absolute top-6 right-6 w-1.5 h-1.5 bg-secondary/60 rounded-full animate-bounce delay-200" />
+                      
+                      <div className="p-6 space-y-4">
+                        {/* Project Header */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md">
+                            <span className="text-lg">❤️</span>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold font-display bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                              Aashayein
+                            </h3>
+                            <p className="text-xs text-muted-foreground font-medium">The Life Saviours</p>
+                          </div>
+                        </div>
+
+                        {/* Project Description */}
+                        <p className="text-sm text-muted-foreground font-light leading-relaxed">
+                          Member & developer for my college social club. Built and maintain this impactful website for a great cause.
+                        </p>
+
+                        {/* Tech Stack */}
+                        <div className="flex flex-wrap gap-2">
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                            Next.js
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                            React
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary/10 px-2 py-1 text-xs font-medium text-secondary">
+                            Social Impact
+                          </span>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex justify-end pt-2">
+                          <a 
+                            href="https://thelifesaviours.org" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group/btn inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-medium rounded-lg shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105 text-sm"
+                          >
+                            <span>View Project</span>
+                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Hover Effect Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                    </div>
+                  </motion.div>
+               </div>
+             
+             {/* Creative View All Projects Button */}
+             <motion.div 
+               className="text-center mt-16"
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 1.5, duration: 0.6 }}
+             >
+               <Link 
+                 href="/projects" 
+                 className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-background/80 to-background border-2 border-primary/20 text-primary font-semibold rounded-2xl shadow-lg backdrop-blur-sm transition-all duration-500 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/20 hover:scale-105 hover:bg-primary/5"
+               >
+                 <span className="relative">
+                   <span className="absolute inset-0 bg-primary/20 rounded-full blur-md group-hover:blur-lg transition-all duration-500" />
+                   <span className="relative">View All Projects</span>
+                 </span>
+                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+               </Link>
+             </motion.div>
+           </motion.section>
         </div>
       </div>
     </div>
