@@ -13,14 +13,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react', 'react-icons'],
     optimizeCss: true,
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
   
   // Compiler optimizations
@@ -29,16 +21,16 @@ const nextConfig = {
   },
   
   // Bundle analyzer (optional - remove in production)
-  ...(process.env.ANALYZE === 'true' && {
-    webpack: (config: any) => {
-      config.plugins.push(
-        new (require('@next/bundle-analyzer'))({
-          enabled: true,
-        })
-      );
-      return config;
-    },
-  }),
+  // ...(process.env.ANALYZE === 'true' && {
+  //   webpack: (config: any) => {
+  //     config.plugins.push(
+  //       new (require('@next/bundle-analyzer'))({
+  //         enabled: true,
+  //       })
+  //     );
+  //     return config;
+  //   },
+  // }),
   
   // TypeScript and ESLint
   typescript: {
