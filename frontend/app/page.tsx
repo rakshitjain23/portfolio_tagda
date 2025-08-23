@@ -437,7 +437,7 @@ export default function Home() {
                           <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                             React
                           </span>
-                          <span className="inline-flex items-center rounded-full border border-secondary/20 bg-secondary/10 px-2 py-1 text-xs font-medium text-secondary">
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                             Social Impact
                           </span>
                         </div>
