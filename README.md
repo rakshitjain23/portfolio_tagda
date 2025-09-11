@@ -1,51 +1,38 @@
 # 🚀 Rakshit Jain - Portfolio
 
-A modern, responsive portfolio website showcasing my skills, projects, and experience as a Full Stack Developer. Built with Next.js, TypeScript, and FastAPI.
+A modern, responsive portfolio website showcasing my skills, projects, and experience as a Full Stack Developer. Built with Next.js, TypeScript, and Next.js API routes.
 
 ## 🌐 Live Demo
 
-- **Frontend (Vercel)**: [devrakshit.me](https://devrakshit.me)
-- **Backend (Render)**: [portfolio-tagda.onrender.com](https://portfolio-tagda.onrender.com)
+- **Website**: [devrakshit.me](https://devrakshit.me)
 
 ## ✨ Features
 
-### 🎨 Frontend (Next.js)
+### 🎨 Next.js Application
 - **Modern Design**: Clean, responsive UI with dark/light mode
 - **Interactive Elements**: Smooth animations with Framer Motion
-- **AI Chatbot**: Intelligent chatbot powered by Hugging Face AI
+- **AI Chatbot**: Intelligent chatbot powered by Google Gemini AI
+- **Contact Form**: Email integration using Nodemailer
+- **API Routes**: Server-side functionality with Next.js API routes
 - **Responsive Layout**: Works perfectly on all devices
 - **SEO Optimized**: Built-in SEO and performance optimization
 - **TypeScript**: Full type safety and better development experience
 
-### 🔧 Backend (FastAPI)
-- **RESTful API**: Clean API endpoints for portfolio data
-- **AI Integration**: Hugging Face AI for intelligent responses
-- **Real-time Chat**: WebSocket support for live chat functionality
-- **CORS Enabled**: Cross-origin resource sharing for frontend integration
-- **Production Ready**: Optimized for deployment on Render
-
 ## 🛠️ Tech Stack
 
-### Frontend
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
+- **Email**: Nodemailer
+- **AI Integration**: Google Gemini API
 - **Deployment**: Vercel
-
-### Backend
-- **Framework**: FastAPI (Python)
-- **AI Integration**: Hugging Face Transformers
-- **WebSocket**: FastAPI WebSockets
-- **Deployment**: Render
-- **Dependencies**: See `backend/requirements.txt`
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+ 
-- Python 3.11+
 - Git
 
 ### Local Development
@@ -56,33 +43,38 @@ A modern, responsive portfolio website showcasing my skills, projects, and exper
    cd portfolio_tagda
    ```
 
-2. **Backend Setup**
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   uvicorn main:app --reload
-   ```
-   Backend will be available at `http://localhost:8000`
-
-3. **Frontend Setup**
+2. **Install dependencies**
    ```bash
    cd frontend
    npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   # Create .env.local file with your API keys
+   # See ENVIRONMENT_SETUP.md for details
+   ```
+
+4. **Run the development server**
+   ```bash
    npm run dev
    ```
-   Frontend will be available at `http://localhost:3000`
+   Application will be available at `http://localhost:3000`
 
 ## 📁 Project Structure
 
 ```
 portfolio_tagda/
-├── frontend/                 # Next.js frontend application
-│   ├── app/                 # App router pages
+├── frontend/                 # Next.js application
+│   ├── app/                 # App router pages and API routes
 │   │   ├── page.tsx        # Home page
 │   │   ├── about/          # About page
 │   │   ├── resume/         # Resume page
 │   │   ├── projects/       # Projects page
-│   │   └── contact/        # Contact page
+│   │   ├── contact/        # Contact page
+│   │   └── api/            # API routes
+│   │       ├── contact/    # Contact form API
+│   │       └── chat/       # AI chatbot API
 │   ├── components/         # Reusable React components
 │   │   ├── layout/         # Layout components (Navbar, etc.)
 │   │   ├── chatbot.tsx     # AI Chatbot component
@@ -90,40 +82,36 @@ portfolio_tagda/
 │   ├── public/            # Static assets
 │   │   ├── profile.jpg    # Profile image
 │   │   └── resume.pdf     # Resume file
-│   └── package.json       # Frontend dependencies
-├── backend/               # FastAPI backend application
-│   ├── main.py           # Main FastAPI application
-│   ├── requirements.txt  # Python dependencies
-│   └── Procfile         # Render deployment config
-├── render.yaml           # Render deployment configuration
-└── README.md            # This file
+│   ├── ENVIRONMENT_SETUP.md # Environment variables guide
+│   └── DEPLOYMENT.md    # Vercel deployment guide
+│   └── package.json       # Dependencies
+└── README.md              # This file
 ```
 
 ## 🔧 Environment Variables
 
-### Frontend (.env.local)
+Create a `.env.local` file in the frontend directory:
+
 ```env
-NEXT_PUBLIC_BACKEND_URL=https://portfolio-tagda.onrender.com
+# Email Configuration
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# AI Chatbot Configuration
+GEMINI_API_KEY=your-gemini-api-key
 ```
 
-### Backend
-```env
-HUGGINGFACE_API_KEY=your_huggingface_api_key
-PORT=8000
-```
+See `ENVIRONMENT_SETUP.md` for detailed setup instructions.
 
 ## 🚀 Deployment
 
-### Frontend (Vercel)
+### Vercel Deployment
 1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
+2. Set environment variables in Vercel dashboard:
+   - `EMAIL_USER`: Your Gmail address
+   - `EMAIL_PASS`: Your Gmail app password
+   - `GEMINI_API_KEY`: Your Google Gemini API key
 3. Deploy automatically on push to main branch
-
-### Backend (Render)
-1. Connect your GitHub repository to Render
-2. Create a new Web Service
-3. Set environment variables
-4. Deploy automatically
 
 ## 📱 Pages & Features
 
@@ -171,7 +159,7 @@ PORT=8000
 - **SEO Friendly**: Built-in SEO optimization
 - **Accessibility**: WCAG compliant design
 - **Modern UI/UX**: Clean, professional design
-- **Real-time Chat**: AI-powered chatbot for visitor interaction
+- **AI Chatbot**: Portfolio-specific AI assistant powered by Google Gemini
 
 ## 🤝 Contributing
 

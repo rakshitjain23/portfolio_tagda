@@ -14,26 +14,6 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [apiKey, setApiKey] = useState("");
-
-  // Get API key from backend on component mount
-  useEffect(() => {
-    const getApiKey = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api-key');
-        if (response.ok) {
-          const data = await response.json();
-          setApiKey(data.api_key);
-        }
-      } catch (error) {
-        console.error('Failed to get API key:', error);
-      }
-    };
-    
-    if (process.env.NODE_ENV === 'development') {
-      getApiKey();
-    }
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -46,12 +26,10 @@ export default function ContactPage() {
     setError("");
     
     try {
-      const backendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com');
-      const response = await fetch(`${backendUrl}/api/contact`, {
+      const response = await fetch('/api/contact', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": apiKey,
         },
         body: JSON.stringify(formData),
       });
@@ -59,7 +37,7 @@ export default function ContactPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Something went wrong");
+        throw new Error(data.error || "Something went wrong");
       }
 
       setIsSubmitted(true);

@@ -85,11 +85,10 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://portfolio-tagda.onrender.com'}/api/chat`, {
+      const response = await fetch('/api/chat', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
         },
         body: JSON.stringify({ message: userMessage }),
       });
@@ -131,7 +130,7 @@ export default function Chatbot() {
               exit={{ opacity: 0, y: 10 }}
               className="absolute bottom-16 right-0 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg mb-2 w-48 text-sm sm:w-56"
             >
-              <p className="text-gray-700 dark:text-gray-300">Have any questions? Ask me anything!</p>
+              <p className="text-gray-700 dark:text-gray-300">Hi! I'm Rakshuu 🤖 Ask me about Rakshit's projects!</p>
               <div className="absolute bottom-0 right-4 transform translate-y-1/2 rotate-45 w-2 h-2 bg-white dark:bg-gray-800"></div>
             </motion.div>
           )}
@@ -140,6 +139,14 @@ export default function Chatbot() {
           onClick={() => {
             setIsOpen(!isOpen);
             setShowPrompt(false); // Hide prompt when chat is opened
+            
+            // Add welcome message when opening chat for the first time
+            if (!isOpen && messages.length === 0) {
+              setMessages([{
+                text: "Hi there! 👋 I'm Rakshuu, Rakshit's AI assistant! I'm here to tell you all about his amazing projects and skills. What would you like to know?",
+                isUser: false
+              }]);
+            }
           }}
           className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
         >
@@ -163,8 +170,11 @@ export default function Chatbot() {
             {/* Header */}
             <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                Chat with Rakshit
+                Chat with Rakshuu 🤖
               </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Rakshit's AI Assistant
+              </p>
             </div>
 
             {/* Messages */}
