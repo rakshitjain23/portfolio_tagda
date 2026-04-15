@@ -31,12 +31,12 @@ const nextConfig = {
   //   },
   // }),
   
-  // TypeScript and ESLint
+  // TypeScript and ESLint — both enforced during builds
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   
   // Headers for performance

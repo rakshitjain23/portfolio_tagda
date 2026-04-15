@@ -1,58 +1,57 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font";
-import { ThemeProvider } from "../components/theme-provider";
-import Navbar from "../components/layout/navbar";
-import AnimatedBackground from "../components/animated-background";
-import Chatbot from "../components/chatbot";
-import "./globals.css";
-import SmoothScroll from "../components/smooth-scroll";
+import type { Metadata } from 'next'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import './globals.css'
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Rakshit Jain - Portfolio",
-  description: "Full Stack Developer & AI Enthusiast",
-};
+  title: 'Rakshit Gang - Full-Stack Developer',
+  description:
+    'Full-Stack Developer & SaaS Builder. I build production-grade web apps and SaaS products. Open to internships and freelance projects.',
+  keywords: [
+    'Rakshit Gang',
+    'Full-Stack Developer',
+    'SaaS Builder',
+    'Next.js',
+    'React',
+    'TypeScript',
+    'Jaipur',
+    'India',
+    'Freelance Developer',
+    'Internship',
+  ],
+  authors: [{ name: 'Rakshit Gang', url: 'https://devrakshit.me' }],
+  openGraph: {
+    title: 'Rakshit Gang - Full-Stack Developer',
+    description:
+      'Full-Stack Developer & SaaS Builder. Open to internships and freelance projects.',
+    url: 'https://devrakshit.me',
+    siteName: 'Rakshit Gang Portfolio',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Rakshit Gang - Full-Stack Developer',
+    description: 'Full-Stack Developer & SaaS Builder.',
+  },
+  metadataBase: new URL('https://devrakshit.me'),
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.variable} font-sans`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <AnimatedBackground />
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <footer className="border-t py-6 md:py-0">
-            <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
-              <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
-                <p className="text-sm text-muted-foreground">
-                  © {currentYear} Rakshit Jain. All rights reserved.
-                </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <a href="mailto:rakshitgang23@gmail.com" className="hover:text-foreground transition-colors">
-                    rakshitgang23@gmail.com
-                  </a>
-                  <a href="tel:+917014518699" className="hover:text-foreground transition-colors">
-                    +91 7014518699
-                  </a>
-                  <span>Jaipur, India</span>
-                </div>
-              </div>
-            </div>
-          </footer>
-          <SmoothScroll />
-          <Chatbot />
-        </ThemeProvider>
+    <html lang="en" className={`${plusJakarta.variable} scroll-smooth`}>
+      <body className={`${plusJakarta.className} antialiased bg-[#0a0a0f] text-[#f0f0fa]`}>
+        {children}
       </body>
     </html>
-  );
+  )
 }
